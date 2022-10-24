@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+# Common fan idprom utility
+#
+# Usage:
+#    feutil all | {fan}
+#
+
+set -e
+
+SCRIPT=$0
+
+function usage() {
+    if [[ ${MAX_FANS} -ne 0 ]]; then
+        echo "Usage: ${SCRIPT} [1..${MAX_FANS}]" 2>&1
+    else
+        echo "?${SCRIPT} is not supported on this platform" 2>&1
+    fi
+}
+
+function fan_weutil() {
+    local FAN=$1
+    IDPROM=/run/devmap/eeproms/${FAN}
+    if [[ ! -L ${IDPROM} ]]; then
+        echo "${SCRIPT}: ${FAN} is not present" 2>&1
+        return 1
+    fi
+    if [[ ! -r ${IDPROM} ]]; then
+        echo "${SCRIPT}: ${FAN} is not readable" 2>&1
+        return 1
+    fi
+    /opt/cisco/bin/weutil ${FAN}
+}
+
+MAX_FANS=5
+
+
+#
+# Override defaults, in particular GRACEFUL.
+# rc file can also define functions which override our own
+#
+RC="/opt/cisco/etc/rc.${SCRIPT##*/}"
+if [[ -r "${RC}" ]]; then
+    source "${RC}"
+fi
+if [[ $# -ne 1 ]] ; then
+    usage
+    exit 1
+fi
+if [[ "$1" = "all" ]]; then
+    FANS=($(cd /run/devmap/eeproms && echo FANTRAY*))
+    for fan in ${FANS[@]}; do
+        fan_weutil ${fan}
+    done
+    exit
+fi
+
+if [[ $1 -lt 1 ]] || [[ $1 -gt ${MAX_FANS} ]] ; then
+    usage
+    exit 1
+fi
+fan_weutil FANTRAY$1

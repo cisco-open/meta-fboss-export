@@ -1,0 +1,164 @@
+{
+    "legal": [
+        "Copyright (c) 2022 Cisco Systems, Inc.",
+        "All rights reserved."
+    ],
+    "weutil": [
+        {
+            "tag": "Wedge EEPROM",
+            "from-tag": "object::path"
+        },
+        {
+            "tag": "Version",
+            "default": "3"
+        },
+        {
+            "tag": "Product Name",
+            "source": [
+                {
+                    "tag": "PRODUCT_ID"
+                },
+                {
+                    "file": "/mnt/data1/x86_pid"
+                }
+            ]
+        },
+        {
+            "tag": "Product Part Number",
+            "default": "00-000000",
+            "from-tag": "THIRD_PARTY_PN"
+        },
+        {
+            "tag": "System Assembly Part Number",
+            "default": "00-0000000-00"
+        },
+        {
+            "tag": "Facebook PCBA Part Number",
+            "default": "000-000000-00"
+        },
+        {
+            "tag": "Facebook PCB Part Number",
+            "default": "000-000000-00"
+        },
+        {
+            "tag": "ODM PCBA Part Number",
+            "from-tag": "PCB_PARTNBR_6"
+        },
+        {
+            "tag": "ODM PCBA Serial Number",
+            "from-tag": "PCB_SERIAL"
+        },
+        {
+            "tag": "Product Production State",
+            "from-tag": "PCB_PARTNBR_6",
+            "format": [
+                "...-.....-0*(.+)",
+                "$1"
+            ],
+            "default": "0"
+        },
+        {
+            "tag": "Product Version",
+            "from-tag": "HW_VERSION",
+            "format": [
+                "([^.]*)[.].*",
+                "$1"
+            ]
+        },
+        {
+            "tag": "Product Sub-Version",
+            "from-tag": "HW_VERSION",
+            "format": [
+                "[^.]*[.](.*)",
+                "$1"
+            ]
+        },
+        {
+            "tag": "Product Serial Number",
+            "source": [
+                {
+                    "tag": "board:CHASSIS_SERIAL"
+                },
+                {
+                    "file": "/mnt/data1/x86_chassis_serial"
+                }
+            ]
+        },
+        {
+            "tag": "Product Asset Tag",
+            "default": "00000000"
+        },
+        {
+            "tag": "System Manufacturer",
+            "default": "Cisco"
+        },
+        {
+            "tag": "System Manufacturing Date",
+            "from-tag": [
+                "CHASSIS_MFG_DATE",
+                "PCB_MFG_DATE"
+            ],
+            "format": [
+                "(..)(..)-(..)-(..)",
+                "$3-$4-$2"
+            ]
+        },
+        {
+            "tag": "PCB Manufacturer"
+        },
+        {
+            "tag": "Assembled At",
+            "from-tag": [
+                "CHASSIS_MFG_LOCATION",
+                "PCB_MFG_LOCATION"
+            ]
+        },
+        {
+            "tag": "Local MAC",
+            "default": "00:00:00:00:00:00",
+            "source": [
+                {
+                    "tag": "MACADDR_BASE:1",
+                    "format": [
+                        "(..)(..)(..)(..)(..)(..)",
+                        "$1:$2:$3:$4:$5:$6"
+                    ]
+                },
+                {
+                    "file": "/mnt/data1/x86_mac_address"
+                },
+                {
+                    "tag": "MACADDR_BASE:0",
+                    "format": [
+                        "(..)(..)(..)(..)(..)(..)",
+                        "$1:$2:$3:$4:$5:$6"
+                    ]
+                }
+            ]
+        },
+        {
+            "tag": "Extended MAC Base",
+            "from-tag": [
+                "MACADDR_BASE",
+                "MACADDR"
+            ],
+            "format": [
+                "(..)(..)(..)(..)(..)(..)",
+                "$1:$2:$3:$4:$5:$6"
+            ],
+            "default": "00:00:00:00:00:00"
+        },
+        {
+            "tag": "Extended MAC Address Size",
+            "from-tag": "MAC_BLKSIZE",
+            "default": "0"
+        },
+        {
+            "tag": "Location on Fabric"
+        },
+        {
+            "tag": "CRC8",
+            "default": "0x0"
+        }
+    ]
+}

@@ -1,0 +1,214 @@
+#!/bin/bash
+#
+# Common churchill power control
+#
+# Usage:
+#    power off {--chassis} {--{un}graceful}
+#    power cycle {--warm|--cold} {--chassis} {--{un}graceful}
+#
+
+set -e
+
+SCRIPT=$0
+
+#
+# Protect against multiple power requests
+#
+if [[ "${FLOCKER}" != "$0" ]]; then
+    exec env FLOCKER="$0" flock "$0" "$0" "$@"
+fi
+
+#
+# There is also an undocumented --force and --dry-run options
+#
+function usage() {
+    echo "Usage: ${SCRIPT} off {--chassis} {--{un}graceful}" 2>&1
+    echo "       ${SCRIPT} cycle {--chassis} {--warm|--cold} {--{un}graceful}" 2>&1
+}
+
+OFF=
+CYCLE=
+CHASSIS=
+WARM=
+COLD=
+GRACEFUL=
+FORCE=
+DRYRUN=
+
+#
+# PID capabilities are not set from arguments.
+# They come through the rc file
+#
+PID_CAPABILITY[POWER_OFF_uSERVER]=
+PID_CAPABILITY[POWER_OFF_CHASSIS]=
+PID_CAPABILITY[WARM_RESET]=
+
+#
+# These are the sysfs paths we will use.
+# These can be overridden in the rc file as well
+#
+PDEV=/sys/bus/platform/devices
+MSD=${PDEV}/msd
+NOTIFIER=${MSD}/reboot_notifier
+
+#
+# Verify paths exist and files are writable
+#
+function writable() {
+    for file in "$@"; do
+        if [[ ! -d "${file%/*}" ]]; then
+	    echo "?Directory ${file%/*} is not available" 2>&1
+            exit 1
+        fi
+	if [[ ! -w ${file} ]]; then
+	    echo "?File ${file} is not writable" 2>&1
+	    exit 1
+	fi
+    done
+}
+
+#
+# Write a value to a file, or simply show what we would
+# write to that file if under a dry-run
+#
+function write_cmd() {
+    if [[ -n "${DRYRUN}" ]]; then
+        echo "[DRY-RUN]" echo "$1 > $2"
+    else
+        echo "$1" > "$2"
+    fi
+}
+
+#
+# Invoke a command, or simply show what we would
+# have invoked if under a dry-run
+#
+function invoke_cmd() {
+    if [[ -n "${DRYRUN}" ]]; then
+        echo "[DRY-RUN]" "$@"
+    else
+        "$@"
+    fi
+}
+
+#
+# Default power off function is for local CPU only.  This
+# expects PID_CAPABILITY[POWER_OFF_CHASSIS] to be empty,
+# and therefore we never call this function if a request
+# to power off the chassis is made.
+#
+function power_off() {
+    if [[ -n "${GRACEFUL}" ]] && \
+       [[ -n "${PID_CAPABILITY[POWER_OFF_uSERVER]}" ]]; then
+        writable "${NOTIFIER}/power-off" \
+                 "${NOTIFIER}/halt"
+        write_cmd "r=0x3c; m=0xfffff7ff; v=0x8" "${NOTIFIER}/power-off"
+        write_cmd "r=0x3c; m=0xfffff7ff; v=0x8" "${NOTIFIER}/halt"
+    fi
+    if [[ -n "${GRACEFUL}" ]] || \
+       [[ -z "${PID_CAPABILITY[POWER_OFF_uSERVER]}" ]]; then
+        invoke_cmd /usr/sbin/shutdown --poweroff now User request from ${SCRIPT}
+    else
+        writable "${MSD}/control"
+        write_cmd power-off "${MSD}/control"
+    fi
+}
+
+#
+# Default power cycle function
+#
+function power_cycle() {
+    if [[ -n "${GRACEFUL}" ]]; then
+        writable "${NOTIFIER}/restart"
+        if [[ -n "${CHASSIS}" ]]; then
+            echo "?Cannot gracefully power cycle chassis. Performing cold reset." 2>&1
+            write_cmd "r=0x3c; m=0xfffff7ff; v=0x400" "${NOTIFIER}/restart"
+        elif [[ -n "${COLD}" ]]; then
+            write_cmd "r=0x3c; m=0xfffff7ff; v=0x40" "${NOTIFIER}/restart"
+        elif [[ -z "${PID_CAPABILITY[WARM_RESET]}" ]]; then
+            echo "?Hardware cannot warm reset the uServer. Performing cold reset." 2>&1
+            write_cmd "r=0x3c; m=0xfffff7ff; v=0x40" "${NOTIFIER}/restart"
+        else
+            write_cmd "r=0x3c; m=0xfffff7ff; v=0x200" "${NOTIFIER}/restart"
+        fi
+        invoke_cmd /usr/sbin/shutdown --reboot now User request from ${SCRIPT}
+    else
+        writable "${MSD}/control"
+        if [[ -n "${CHASSIS}" ]]; then
+            write_cmd power-cycle "${MSD}/control"
+        elif [[ -n "${COLD}" ]]; then
+            write_cmd cold-reset "${MSD}/control"
+        elif [[ -z "${PID_CAPABILITY[WARM_RESET]}" ]]; then
+            echo "?Cannot warm reset the uServer. Performing cold reset." 2>&1
+            write_cmd cold-reset "${MSD}/control"
+        else
+            write_cmd warm-reset "${MSD}/control"
+        fi
+    fi
+}
+
+#
+# Override defaults, in particular GRACEFUL.
+# rc file can also define functions which override our own
+#
+RC="/opt/cisco/etc/rc.${SCRIPT##*/}"
+if [[ -r "${RC}" ]]; then
+    source "${RC}"
+fi
+while [[ $# > 0 ]]; do
+    case "$1" in
+       --chassis) CHASSIS=1; shift;;
+       --warm) WARM=1; shift;;
+       --cold) COLD=1; shift;;
+       --force) FORCE=1; shift;;
+       --graceful) GRACEFUL=1; shift;;
+       --ungraceful) GRACEFUL=; shift;;
+       --dry-run) DRYRUN=1; shift;;
+       off) OFF=1; shift;;
+       cycle) CYCLE=1; shift;;
+       *) usage; exit 1;;
+    esac
+done
+
+if [[ -n "${WARM}" ]] && [[ -n "${COLD}" ]]; then
+    echo '?Options --warm and --cold are mutually exclusive' 2>&1
+    exit 1
+fi
+
+if [[ -n "${CYCLE}" ]] && [[ -n "${OFF}" ]]; then
+    echo '?Commands cycle and off are mutually exclusive' 2>&1
+    exit 1
+fi
+if [[ -z "${CYCLE}" ]] && [[ -z "${OFF}" ]]; then
+    echo '?Command must be provided; either cycle or off' 2>&1
+    exit 1
+fi
+
+writable "${MSD}/cfg7"
+V=$(cat "${MSD}/cfg7")
+if [[ "${V}" != 0x0 ]]; then
+    if [[ -n "${FORCE}" ]]; then
+        echo "?Operation (${V}) in progress." \
+             "Ignoring due to --force option" 2>71
+        write_cmd 0 "${MSD}/cfg7"
+    else
+        echo "?Operation (${V}) in progress" 2>&1
+        exit 1
+    fi
+fi
+
+if [[ -n "${OFF}" ]]; then
+    if [[ -n "${WARM}" ]] || [[ -n "${COLD}" ]]; then
+        echo '?Options --warm and --cold only apply to cycle command' 2>&1
+        exit 1
+    fi
+    if [[ -n "${CHASSIS}" ]] && [[ -z "${PID_CAPABILITY[POWER_OFF_CHASSIS]}" ]]; then
+        echo '?Hardware is not capable of powering off chassis' 2>&1
+        exit 1
+    fi
+    power_off
+fi
+
+if [[ -n "${CYCLE}" ]]; then
+    power_cycle
+fi

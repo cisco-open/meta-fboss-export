@@ -1,0 +1,45 @@
+#!/bin/bash
+#
+# Common pim utility
+#
+# Usage:
+#    peutil {pim}
+#
+
+set -e
+
+SCRIPT=$0
+
+function usage() {
+    if [[ ${MAX_PIMS} -ne 0 ]]; then
+        echo "Usage: ${SCRIPT} [1..${MAX_PIMS}]" 2>&1
+    else
+        echo "?${SCRIPT} is not supported on this platform" 2>&1
+    fi
+}
+
+MAX_PIMS=8
+
+#
+# Override defaults, in particular GRACEFUL.
+# rc file can also define functions which override our own
+#
+RC="/opt/cisco/etc/rc.${SCRIPT##*/}"
+if [[ -r "${RC}" ]]; then
+    source "${RC}"
+fi
+if [[ $# -ne 1 ]] || [[ $1 -lt 1 ]] || [[ $1 -gt ${MAX_PIMS} ]] ; then
+    usage
+    exit 1
+fi
+PIM=$1
+IDPROM=/run/devmap/eeproms/PIM${PIM}
+if [[ ! -L ${IDPROM} ]]; then
+    echo "${SCRIPT}: PIM${PIM} is not present" 2>&1
+    exit 1
+fi
+if [[ ! -r ${IDPROM} ]]; then
+    echo "${SCRIPT}: PIM${PIM} is not readable" 2>&1
+    exit 1
+fi
+exec /opt/cisco/bin/weutil PIM${PIM}

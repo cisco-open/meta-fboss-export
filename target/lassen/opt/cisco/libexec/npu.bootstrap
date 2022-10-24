@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+# Common churchill NPU initialization
+#
+set -e -v
+XR_SYSCTL=/opt/cisco/bin/xr_sysctl
+BSP_GPIO="/opt/cisco/bin/bsp gpio --raw"
+RM_PATH=/sys/bus/pci/devices/0000:00:03.1/remove
+if [[ -d ${RM_PATH} ]]; then
+    echo 1 > ${RM_PATH}
+fi
+GB_REVISION=$(${XR_SYSCTL} -n bootstrap.idproms.board.content.GB_REVISION)
+if [[ "${GB_REVISION}" == A0 ]]; then
+    ${BSP_GPIO} \
+        CPLL_CFG_DIVF=53 \
+        CPLL_CFG_DIVR=0 \
+        CPLL_CFG_DIVQ=1 \
+        NPU_A_RST_L=0 \
+        NPU_POWER_STABLE=0 \
+        SCAN_MODE=0 \
+        TRI_L=1 \
+        --wait=6ms \
+        NPU_POWER_STABLE=1 \
+        --wait=50ms \
+        TRI_L=0 \
+        --wait=5ms \
+        SCAN_MODE=1 \
+        --wait=5ms \
+        SCAN_MODE=0 \
+        --wait=5ms \
+        TRI_L=1 \
+        --wait=40ms \
+        NPU_A_RST_L=1 \
+        --wait=5ms \
+        NPU_A_RST_L=0 \
+        --wait=5ms \
+        NPU_POWER_STABLE=0 \
+        --wait=5ms \
+        NPU_POWER_STABLE=1 \
+        --wait=5ms \
+        NPU_A_RST_L=1 \
+        --wait=10s
+else
+    ${BSP_GPIO} \
+        CPLL_CFG_DIVF=53 \
+        CPLL_CFG_DIVR=0 \
+        CPLL_CFG_DIVQ=1 \
+        NPU_A_RST_L=0 \
+        NPU_POWER_STABLE=0 \
+        SCAN_MODE=0 \
+        TRI_L=1 \
+        --wait=5ms \
+        NPU_POWER_STABLE=1 \
+        --wait=5ms \
+        NPU_A_RST_L=1 \
+        --wait=1s
+fi
+echo 1 > /sys/bus/pci/rescan
+eval "$(${BSP_GPIO} --verbose CPLL_CFG_DIVF CPLL_CFG_DIVR CPLL_CFG_DIVQ)"
+FREQ=$((50 * 1000000 * 2 * (CPLL_CFG_DIVF + 1) / ((CPLL_CFG_DIVR + 1) * (CPLL_CFG_DIVQ * 4))))
+UNITS=
+case "${FREQ}" in
+   *000000000) UNITS=G; FREQ=$((FREQ/1000000000)) ;;
+   *000000)    UNITS=M; FREQ=$((FREQ/1000000)) ;;
+   *000)       UNITS=K; FREQ=$((FREQ/1000)) ;;
+esac
+echo NPU clock frequency ${FREQ} ${UNITS}Hz

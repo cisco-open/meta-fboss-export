@@ -1,0 +1,128 @@
+#!/bin/bash
+#
+# Common Kodiak PIM powerup
+#
+PIM=$1
+PIM_SMB_GPIO=$(echo $[$PIM - 1])
+
+gpio_set () {
+    local value=$1
+    local pin=$2
+    local gpio_info=$(gpiofind $pin)
+
+    gpioset ${gpio_info}=$value
+}
+
+gpio_get () {
+    local pin=$1
+    local gpio_info=$(gpiofind $pin)
+    local value=$(gpioget ${gpio_info})
+
+    echo $value
+}
+
+gpio_set_list () {
+    value=$1
+    pins=$(gpioinfo | grep PIM${PIM} | grep $2 | grep $3 | tr "\"" " "  | awk '{print $3}')
+    for pin in $pins;
+    do
+        gpio_set $value $pin
+    done
+}
+
+gpio_get_list () {
+    pins=$(gpioinfo | grep PIM${PIM} | grep $1 | grep $2 | tr "\"" " "  | awk '{print $3}')
+    for pin in $pins;
+    do
+        value=$(gpio_get $pin)
+        echo $pin = $value
+    done
+}
+
+PZ_WILD_PATH_TOP=/sys/bus/platform/devices/slpc-m-slot.${PIM}/pzctl.*.auto
+PZ_WILD_PATH=/sys/bus/platform/devices/slpc-m-slot.${PIM}/pzctl.*.auto/info
+
+SLPC_PATH_TOP=/sys/bus/platform/devices/slpc-m-slot.${PIM}
+SLPC_READY=/sys/bus/platform/devices/slpc-m.${PIM}/pim_ready
+SLPC_INIT_DONE=/sys/bus/platform/devices/slpc-m.${PIM}/pim_sw_presence_map
+
+PZ_PATH_TOP=$( dirname ${PZ_WILD_PATH_TOP} )
+PZ_PATH=$( dirname ${PZ_WILD_PATH} )
+
+echo ${PZ_PATH}
+
+PIM_READY=$( cat $SLPC_READY )
+
+present=$(gpio_get PIM${PIM_SMB_GPIO}_PRSNT_L)
+echo PIM${PIM_SMB_GPIO}_PRSNT_L present: $present $SLPC_READY: $PIM_READY
+
+#
+# GPIO is 0 for present, 1 for not present
+#
+if [[ "$present" -ne 0 ]]; then
+    echo PIM${PIM} not present exiting present $present
+    exit 0
+fi
+
+counter=1
+while [ $counter -le 10 ]
+do
+    ready=$(cat $SLPC_READY)
+    present=$(gpio_get PIM${PIM_SMB_GPIO}_PRSNT_L)
+    init=$(cat $SLPC_INIT_DONE)
+    echo counter $counter : present $present : init $init : ready $ready
+
+    if [[ -d ${PZ_PATH_TOP} ]]; then
+        echo $PZ_PATH_TOP exists
+    else
+        echo $PZ_PATH_TOP does NOT exist
+    fi
+
+    if [[ -d ${SLPC_PATH_TOP} ]]; then
+        echo $SLPC_PATH_TOP exists
+    else
+        echo $SLPC_PATH_TOP does NOT exist
+    fi
+
+    if [[ -d ${PZ_PATH} ]]; then
+        echo Powering on PIM${PIM}
+        echo on > ${PZ_PATH}/config
+        break
+    fi
+    ((counter++))
+    date
+    sleep 1
+done
+
+present=$(gpio_get PIM${PIM_SMB_GPIO}_PRSNT_L)
+ready=$(cat $SLPC_READY)
+init=$(cat $SLPC_INIT_DONE)
+echo counter $counter : present $present : init $init : ready $ready
+sleep 1
+date
+
+echo PIM${PIM} counter $counter
+if [[ -d ${PZ_PATH} ]]; then
+    cat ${PZ_PATH}/power_state
+else
+    # This means the kmod are not ready or errored out
+    # Count would expected to be max
+    echo PIM${PIM} This is an error state
+    exit -1
+fi
+
+gpio_set_list 0 QSFP PWR_EN
+gpio_set_list 0 QSFP RST_L
+gpio_set_list 0 CDR RESET_L
+
+sleep 0.01
+gpio_set_list 1 CDR RESET_L
+gpio_set_list 1 QSFP PWR_EN
+sleep 0.01
+gpio_set_list 1 QSFP RST_L
+
+gpio_get_list QSFP PWR_EN
+gpio_get_list QSFP RST_L
+gpio_get_list CDR RESET_L
+date
+echo DONE PIM${PIM}

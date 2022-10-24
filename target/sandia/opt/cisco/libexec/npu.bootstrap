@@ -1,0 +1,94 @@
+#!/bin/bash
+#
+# Common Kodiak NPU initialization
+#
+set -e -v
+RM_PATH=/sys/bus/pci/devices/0000:00:05.0/remove
+
+gpio_set () {
+    local value=$1
+    local pin=$2
+    local gpio_info=$(gpiofind $pin)
+
+    gpioset ${gpio_info}=$value
+}
+
+gpio_get () {
+    local pin=$1
+    local gpio_info=$(gpiofind $pin)
+    local value=$(gpioget ${gpio_info})
+
+    echo $value
+}
+
+gpio_get_group_value () {
+    local pin_base=$1
+    local pins=$(gpioinfo | grep $pin_base | tr "\"" " " | awk '{print $3}')
+    local index=0
+    local value=0
+    local ret_value=0
+    local pin
+
+    for pin in $pins
+    do
+        value=$(gpio_get $pin)
+        index=$(echo $pin | tr "_" " " | awk '{print $NF}')
+        echo $pin " index " $index " value " $value
+        (( ret_value += $value << $index ))
+        (( index += 1))
+    done
+    echo $ret_value
+}
+
+echo 1 > ${RM_PATH}
+echo off > /sys/bus/platform/devices/pzctl.0/config
+
+# Set these back to cleared state
+gpio_set 0 NPU_A_RST_L
+gpio_set 0 NPU_C_A_RST_L
+gpio_set 0 NPU_POWER_STABLE
+gpio_set 0 SCAN_MODE
+gpio_set 1 TRI_L
+sleep 0.05
+
+echo on > /sys/bus/platform/devices/pzctl.0/config
+sleep 1
+cat /sys/bus/platform/devices/pzctl.0/power_state
+
+gpio_set 1 NPU_POWER_STABLE
+sleep 0.005
+gpio_set 1 NPU_A_RST_L
+sleep 0.005
+gpio_set 1 NPU_C_A_RST_L
+sleep 1
+
+echo 1 > /sys/bus/pci/rescan
+echo rescanned
+
+CPLL_CFG_DIVF=$(gpio_get_group_value CPLL_CFG_DIVF)
+CPLL_CFG_DIVR=$(gpio_get_group_value CPLL_CFG_DIVR)
+CPLL_CFG_DIVQ=$(gpio_get_group_value CPLL_CFG_DIVQ)
+RST_FSM_STATE_OBS=$(gpio_get_group_value RST_FSM_STATE_OBS)
+echo CPLL_CFG_DIVF $CPLL_CFG_DIVF CPLL_CFG_DIVR $CPLL_CFG_DIVR CPLL_CFG_DIVQ $CPLL_CFG_DIVQ \
+   RST_FSM_STATE_OBS $RST_FSM_STATE_OBS
+
+FREQ=$((50 * 1000000 * 2 * (CPLL_CFG_DIVF + 1) / ((CPLL_CFG_DIVR + 1) * (CPLL_CFG_DIVQ * 4))))
+UNITS=
+case "${FREQ}" in
+   *000000000) UNITS=G; FREQ=$((FREQ/1000000000)) ;;
+   *000000)    UNITS=M; FREQ=$((FREQ/1000000)) ;;
+   *000)       UNITS=K; FREQ=$((FREQ/1000)) ;;
+esac
+echo NPU clock frequency ${FREQ} ${UNITS}Hz fsm ${RST_FSM_STATE_OBS}
+
+# This is a temporary hack
+# Power up all the PIMs
+# (If not present they do nothing)
+/opt/cisco/libexec/pim.bootstrap 1
+/opt/cisco/libexec/pim.bootstrap 2
+/opt/cisco/libexec/pim.bootstrap 3
+/opt/cisco/libexec/pim.bootstrap 4
+/opt/cisco/libexec/pim.bootstrap 5
+/opt/cisco/libexec/pim.bootstrap 6
+/opt/cisco/libexec/pim.bootstrap 7
+/opt/cisco/libexec/pim.bootstrap 8
