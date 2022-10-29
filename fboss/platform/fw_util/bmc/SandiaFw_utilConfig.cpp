@@ -42,6 +42,36 @@ std::string getSandiaFpdsData() {
                 }
             ],
             "path": "/mnt/data1/fpd/spf_scm_bios_upgrade.img"
+        },
+        {
+            "cmdline": [
+                "/opt/cisco/bin/bios_mtd_upgrade.sh",
+                "{PATH}",
+                "{PATH}"
+            ],
+            "description": "BIOS - Basic Input Output System",
+            "dllpath": "/opt/cisco/lib/libfpd_bmc_bios.so.1.0.1",
+            "dllsymbol": "get_fpd_obj_bmc_bios",
+            "match": [],
+            "name": "BIOS_FULL",
+            "offsets": {
+                "flash_version_offset": "0xDACE00",
+                "helper_script": "/opt/cisco/bin/bios_bmc_create_mtd.sh",
+                "mtd_name": "bios",
+                "select_mux_script": "/opt/cisco/bin/bios_bmc_select_mux.sh",
+                "unselect_mux_script": "/opt/cisco/bin/bios_bmc_unselect_mux.sh"
+            },
+            "oid": {
+                "index": 2,
+                "type": "fpd"
+            },
+            "parents": [
+                {
+                    "index": 1,
+                    "type": "platform"
+                }
+            ],
+            "path": "/mnt/data1/fpd/spf_scm_bios_upgrade.img"
         }
     ],
     "pid": "85_SCM_O_BMC"
