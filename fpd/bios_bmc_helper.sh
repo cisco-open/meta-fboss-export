@@ -8,7 +8,36 @@ is_x86_on() {
     cat /sys/bus/platform/devices/pseq/power_state | grep "on"
 }
 
+set_cpld_misc_bmcCpuSpiFlashSel() {
+
+    i2cset -f -y 12 0x31 0x0c
+    i2cset -f -y 12 0x32 0x00
+    i2cset -f -y 12 0x33 0x00
+    i2cset -f -y 12 0x34 0x00
+    i2cset -f -y 12 0x35 0x03
+    i2cset -f -y 12 0x36 0x0e
+    i2cset -f -y 12 0x37 0x0c
+    i2cset -f -y 12 0x38 0x01
+    i2cset -f -y 12 0x30 0x00
+
+}
+
+unset_cpld_misc_bmcCpuSpiFlashSel() {
+
+    i2cset -f -y 12 0x31 0x0c
+    i2cset -f -y 12 0x32 0x00
+    i2cset -f -y 12 0x33 0x00
+    i2cset -f -y 12 0x34 0x00
+    i2cset -f -y 12 0x35 0x03
+    i2cset -f -y 12 0x36 0x0a
+    i2cset -f -y 12 0x37 0x0c
+    i2cset -f -y 12 0x38 0x00
+    i2cset -f -y 12 0x30 0x00
+
+}
+
 bmc_create_bios_mtd() {
+
     # check if mtd partition alredy exists
     part_str=$(cat /proc/mtd | grep "bios" | awk '{print $1;}')
     mtd_part="${part_str%?}"
@@ -18,16 +47,14 @@ bmc_create_bios_mtd() {
         return
     fi
 
-    #setup the i2c mux
-    i2cset -f -y 12 0x31 0x0c
-    i2cset -f -y 12 0x32 0x00
-    i2cset -f -y 12 0x33 0x00
-    i2cset -f -y 12 0x34 0x00
-    i2cset -f -y 12 0x35 0x03
-    i2cset -f -y 12 0x36 0x0e
-    i2cset -f -y 12 0x37 0x00
-    i2cset -f -y 12 0x38 0x01
-    i2cset -f -y 12 0x30 0x0
+    # setup the spi mux from cpu-cpld
+    set_cpld_misc_bmcCpuSpiFlashSel
 
-    echo 1e630000.spi > /sys/bus/platform/drivers/aspeed-smc/bind
+    if [ -w /sys/bus/platform/drivers/spi-aspeed-smc/1e630000.spi ]; then
+        echo 1e630000.spi > /sys/bus/platform/drivers/spi-aspeed-smc/unbind
+    fi
+    echo 1e630000.spi > /sys/bus/platform/drivers/spi-aspeed-smc/bind
+
 }
+
+

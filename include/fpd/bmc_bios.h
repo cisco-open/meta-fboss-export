@@ -23,6 +23,10 @@ public:
 
     std::string get_bios_version_from_spiflash() const;
 
+    void unselect_mux() const;
+
+    void select_mux() const;
+
     virtual ~Fpd_bmc_bios() {}
 
 };
