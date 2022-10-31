@@ -13,7 +13,7 @@ set_cpld_misc_bmcCpuSpiFlashSel() {
     # Expected default on this register: 0x000c0a03
     # To access SPI flash from BMC we are setting bit 10 & 24
     # as per hardware recommendation. Updating the register to
-    # 0x010c0e03 accordingly. 
+    # 0x010c0e03 accordingly.
 
     i2cset -f -y 12 0x31 0x0c
     i2cset -f -y 12 0x32 0x00
@@ -29,8 +29,8 @@ set_cpld_misc_bmcCpuSpiFlashSel() {
 
 unset_cpld_misc_bmcCpuSpiFlashSel() {
 
-    # To restore SPI access back to x86 CPU we are clearing bit 10 & 24                   
-    # as per hardware recommendation. Updating the register to                  
+    # To restore SPI access back to x86 CPU we are clearing bit 10 & 24
+    # as per hardware recommendation. Updating the register to
     # 0x000c0a03 accordingly.
 
     i2cset -f -y 12 0x31 0x0c
