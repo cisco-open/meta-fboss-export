@@ -53,6 +53,36 @@ get_shell_cmd_output(const char* cmd) {
     return result;
 }
 
+void
+Fpd_bmc_bios::select_mux() const
+{
+
+    /* Select MUX for BMC access  */
+    std::vector<std::string> helper;
+    std::vector<std::string> arg_list;
+    std::string helper_script = fpd_t::get_fpga_offset("select_mux_script");
+
+    helper.push_back(helper_script);
+    fpd_t::invoke(helper, arg_list);
+
+}
+
+
+void
+Fpd_bmc_bios::unselect_mux() const
+{
+
+    /* Unselect MUX for x86 access  */
+    std::vector<std::string> helper;
+    std::vector<std::string> arg_list;
+    std::string helper_script = fpd_t::get_fpga_offset("unselect_mux_script");
+
+    helper.push_back(helper_script);
+    fpd_t::invoke(helper, arg_list);
+
+}
+
+
 std::string
 Fpd_bmc_bios::get_bios_version_from_spiflash() const
 {
@@ -194,7 +224,11 @@ Fpd_bmc_bios::program(bool force) const
     auto image_path = fpd_t::path();
     std::vector<std::string> mtd_name {image_path, fpd_t::get_fpga_offset("mtd_name")};
 
+    select_mux();
+
     fpd_t::invoke(helper, mtd_name);
+
+    unselect_mux();
 }
 
 std::string 
@@ -206,7 +240,14 @@ Fpd_bmc_bios::running_version(void) const
 
     helper.push_back(helper_script);
     fpd_t::invoke(helper, arg_list);
-    return get_bios_version_from_spiflash();
+
+    select_mux();
+
+    std::string running_version = get_bios_version_from_spiflash();
+
+    unselect_mux();
+
+    return running_version;
 }
 
 std::string 

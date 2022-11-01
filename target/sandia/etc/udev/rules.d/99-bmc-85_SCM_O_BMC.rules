@@ -1,0 +1,11 @@
+# Cisco 8000 udev rules
+# Copyright (c) 2022 Cisco Systems, Inc.
+# All rights reserved.
+SUBSYSTEM=="i2c", DRIVER=="cisco-fpga-bmc", RUN+="/bin/mkdir -p /run/devmap/eeproms"
+
+SUBSYSTEM=="i2c", KERNEL=="8-0054", DRIVER=="at24", ATTR{name}=="24c64", ACTION=="add", RUN+="/bin/ln -s /sys/bus/i2c/drivers/at24/%k/eeprom /run/devmap/eeproms/BMC"
+SUBSYSTEM=="i2c", KERNEL=="8-0054", DRIVER=="at24", ATTR{name}=="24c64", ACTION=="remove", RUN+="/usr/bin/rm -f /run/devmap/eeproms/BMC"
+SUBSYSTEM=="i2c", KERNEL=="*-0050", DRIVER=="at24", ATTR{name}=="24c64", ATTRS{name}=="SCM_IDPROM:*", ACTION=="add", RUN+="/bin/ln -s /sys/bus/i2c/drivers/at24/%k/eeprom /run/devmap/eeproms/SCM"
+SUBSYSTEM=="i2c", KERNEL=="*-0050", DRIVER=="at24", ATTR{name}=="24c64", ATTRS{name}=="SCM_IDPROM:*", ACTION=="remove", RUN+="/usr/bin/rm -f /run/devmap/eeproms/SCM"
+SUBSYSTEM=="i2c", KERNEL=="*-a0d0", DRIVER=="at24", ATTR{name}=="24c64", ATTRS{name}=="SCM_IDPROM:*", ACTION=="add", RUN+="/bin/ln -s /sys/bus/i2c/drivers/at24/%k/eeprom /run/devmap/eeproms/PDB"
+SUBSYSTEM=="i2c", KERNEL=="*-a0d0", DRIVER=="at24", ATTR{name}=="24c64", ATTRS{name}=="SCM_IDPROM:*", ACTION=="remove", RUN+="/usr/bin/rm -f /run/devmap/eeproms/PDB"
