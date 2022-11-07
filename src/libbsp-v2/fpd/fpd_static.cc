@@ -10,8 +10,10 @@
 #include <private/sysfs.h>
 
 #include <fpd/aldrin.h>
+#include <fpd/bios.h>
 #include <fpd/bmc_bios.h>
 #include <fpd/cpucpld.h>
+#include <fpd/flash.h>
 #include <fpd/nvme.h>
 #include <fpd/pemcpld.h>
 #include <fpd/powercpld.h>
@@ -35,7 +37,9 @@ fpd_proxy_t::setup(pointer<fpd_t> parent)
     fpd_t *lib_obj = NULL;
     const std::string& lib_symbol = libsymbol();
 
-    if (!lib_symbol.compare("get_fpd_obj_pwrcpld")) {
+    if (!lib_symbol.compare("get_fpd_obj_sjtag")) {
+        lib_obj = new Fpd_flash(cobj);
+    } else if (!lib_symbol.compare("get_fpd_obj_pwrcpld")) {
         lib_obj = new Fpd_powercpld(cobj);
     } else if (!lib_symbol.compare("get_fpd_obj_cpucpld")) {
         lib_obj = new Fpd_cpucpld(cobj);
@@ -45,6 +49,8 @@ fpd_proxy_t::setup(pointer<fpd_t> parent)
         lib_obj = new Fpd_ssd(cobj);
     } else if (!lib_symbol.compare("get_fpd_obj_bmc_bios")) {
         lib_obj = new Fpd_bmc_bios(cobj);
+    } else if (!lib_symbol.compare("get_fpd_obj_bios")) {
+        lib_obj = new Fpd_bios(cobj);
     }
 
     if (!lib_obj) {

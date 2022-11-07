@@ -87,6 +87,13 @@ public:
     std::string get_version() const;
 
     //!
+    //! @brief gets the expected version of FPD from pathspec
+    //!
+    //! @returns The expected version of the FPD
+    //!
+    std::string get_expected_version() const;
+
+    //!
     //! @brief gets the i2c device info from the device pathspec
     //!
     //! @returns i2c device info from resolved path
@@ -266,6 +273,7 @@ private:
     std::string m_dllsymbol;                           //!< FPD symbol path
     std::map<std::string, std::string> m_offsets;      //!< FPGA address offsets 
     bool m_golden;                                     //!< Golden upgrade flag
+    std::string m_expected_version;                    //!< path access to retrieve expected version
 
 }; // class fpd_t
 

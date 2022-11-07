@@ -12,6 +12,7 @@
 
 #include "commonUtil.h"
 #include "fpd/nvme.h"
+#include "fpd_utils.h"
 
 #define SMART_VENDOR_ID "0x1235"
 #define MICRON_VENDOR_ID "0x1344"
@@ -28,27 +29,13 @@ get_nvme_attribute(std::string &input_str)
     return result;
 }
 
-std::string
-Fpd_nvme::exec_shell_command(const char* cmd) const 
-{
-    char  result[128];
-    FILE *fp = popen(cmd, "r");
-    if (!fp) {
-        throw std::runtime_error("popen() failed!");
-    }
-    fgets(result, sizeof(result), fp);
-    result[strcspn(result, "\n")] = 0;
-    pclose(fp);
-    return result;
-}
-
 void
 Fpd_nvme::program(bool force) const
 {
     auto helper = fpd_t::helper();
     std::vector <std::string> image_path = {fpd_t::path()};
 
-    fpd_t::invoke(helper, image_path);
+    nvme_upgrade(image_path[0]);
 }
 
 void

@@ -27,3 +27,7 @@ public:
 private:
     std::string get_bios_version() const;
 };
+
+void bios_upgrade(std::string, int);
+
+void create_images(std::string);
