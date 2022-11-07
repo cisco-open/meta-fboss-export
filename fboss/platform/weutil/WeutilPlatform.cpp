@@ -106,8 +106,14 @@ WeutilCisco::printInfoJson(std::ostream &s)
     s << std::setw(4) << j << std::endl;
 }
 
+bool
+WeutilCisco::verifyOptions(void)
+{
+    return true;
+}
+
 std::vector<std::pair<std::string, std::string>>
-WeutilCisco::getInfo()
+WeutilCisco::getInfo(std::string eeprom)
 {
     std::vector<std::pair<std::string, std::string>> ret;
 

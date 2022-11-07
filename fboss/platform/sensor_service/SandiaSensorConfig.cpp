@@ -1170,7 +1170,7 @@ std::string getSandiaConfig() {
         },
         "FANTRAY1": {
             "FANTRAY1_FAN1_PWM": {
-                "path": "/run/devmap/sensors/FANTRAY1_FAN1/pwm1",
+                "path": "/run/devmap/sensors/FAN/pwm1",
                 "thresholdMap": {
                     "0": 100,
                     "1": 40
@@ -1178,7 +1178,7 @@ std::string getSandiaConfig() {
                 "type": 5
             },
             "FANTRAY1_FAN1_RPM": {
-                "path": "/run/devmap/sensors/FANTRAY1_FAN1/fan1_input",
+                "path": "/run/devmap/sensors/FAN/fan1_input",
                 "thresholdMap": {
                     "0": 12430,
                     "1": 3164,
@@ -1188,7 +1188,7 @@ std::string getSandiaConfig() {
                 "type": 4
             },
             "FANTRAY1_FAN2_PWM": {
-                "path": "/run/devmap/sensors/FANTRAY1_FAN2/pwm2",
+                "path": "/run/devmap/sensors/FAN/pwm2",
                 "thresholdMap": {
                     "0": 100,
                     "1": 40
@@ -1196,7 +1196,7 @@ std::string getSandiaConfig() {
                 "type": 5
             },
             "FANTRAY1_FAN2_RPM": {
-                "path": "/run/devmap/sensors/FANTRAY1_FAN2/fan2_input",
+                "path": "/run/devmap/sensors/FAN/fan2_input",
                 "thresholdMap": {
                     "0": 13200,
                     "1": 3360,
@@ -1208,7 +1208,7 @@ std::string getSandiaConfig() {
         },
         "FANTRAY2": {
             "FANTRAY2_FAN1_PWM": {
-                "path": "/run/devmap/sensors/FANTRAY2_FAN1/pwm3",
+                "path": "/run/devmap/sensors/FAN/pwm3",
                 "thresholdMap": {
                     "0": 100,
                     "1": 40
@@ -1216,7 +1216,7 @@ std::string getSandiaConfig() {
                 "type": 5
             },
             "FANTRAY2_FAN1_RPM": {
-                "path": "/run/devmap/sensors/FANTRAY2_FAN1/fan3_input",
+                "path": "/run/devmap/sensors/FAN/fan3_input",
                 "thresholdMap": {
                     "0": 12430,
                     "1": 3164,
@@ -1226,7 +1226,7 @@ std::string getSandiaConfig() {
                 "type": 4
             },
             "FANTRAY2_FAN2_PWM": {
-                "path": "/run/devmap/sensors/FANTRAY2_FAN2/pwm4",
+                "path": "/run/devmap/sensors/FAN/pwm4",
                 "thresholdMap": {
                     "0": 100,
                     "1": 40
@@ -1234,7 +1234,7 @@ std::string getSandiaConfig() {
                 "type": 5
             },
             "FANTRAY2_FAN2_RPM": {
-                "path": "/run/devmap/sensors/FANTRAY2_FAN2/fan4_input",
+                "path": "/run/devmap/sensors/FAN/fan4_input",
                 "thresholdMap": {
                     "0": 13200,
                     "1": 3360,
@@ -1246,7 +1246,7 @@ std::string getSandiaConfig() {
         },
         "FANTRAY3": {
             "FANTRAY3_FAN1_PWM": {
-                "path": "/run/devmap/sensors/FANTRAY3_FAN1/pwm5",
+                "path": "/run/devmap/sensors/FAN/pwm5",
                 "thresholdMap": {
                     "0": 100,
                     "1": 40
@@ -1254,7 +1254,7 @@ std::string getSandiaConfig() {
                 "type": 5
             },
             "FANTRAY3_FAN1_RPM": {
-                "path": "/run/devmap/sensors/FANTRAY3_FAN1/fan5_input",
+                "path": "/run/devmap/sensors/FAN/fan5_input",
                 "thresholdMap": {
                     "0": 12430,
                     "1": 3164,
@@ -1264,7 +1264,7 @@ std::string getSandiaConfig() {
                 "type": 4
             },
             "FANTRAY3_FAN2_PWM": {
-                "path": "/run/devmap/sensors/FANTRAY3_FAN2/pwm6",
+                "path": "/run/devmap/sensors/FAN/pwm6",
                 "thresholdMap": {
                     "0": 100,
                     "1": 40
@@ -1272,7 +1272,7 @@ std::string getSandiaConfig() {
                 "type": 5
             },
             "FANTRAY3_FAN2_RPM": {
-                "path": "/run/devmap/sensors/FANTRAY3_FAN2/fan6_input",
+                "path": "/run/devmap/sensors/FAN/fan6_input",
                 "thresholdMap": {
                     "0": 13200,
                     "1": 3360,
@@ -1284,7 +1284,7 @@ std::string getSandiaConfig() {
         },
         "FANTRAY4": {
             "FANTRAY4_FAN1_PWM": {
-                "path": "/run/devmap/sensors/FANTRAY4_FAN1/pwm7",
+                "path": "/run/devmap/sensors/FAN/pwm7",
                 "thresholdMap": {
                     "0": 100,
                     "1": 40
@@ -1292,7 +1292,7 @@ std::string getSandiaConfig() {
                 "type": 5
             },
             "FANTRAY4_FAN1_RPM": {
-                "path": "/run/devmap/sensors/FANTRAY4_FAN1/fan7_input",
+                "path": "/run/devmap/sensors/FAN/fan7_input",
                 "thresholdMap": {
                     "0": 12430,
                     "1": 3164,
@@ -1302,7 +1302,7 @@ std::string getSandiaConfig() {
                 "type": 4
             },
             "FANTRAY4_FAN2_PWM": {
-                "path": "/run/devmap/sensors/FANTRAY4_FAN2/pwm8",
+                "path": "/run/devmap/sensors/FAN/pwm8",
                 "thresholdMap": {
                     "0": 100,
                     "1": 40
@@ -1310,7 +1310,7 @@ std::string getSandiaConfig() {
                 "type": 5
             },
             "FANTRAY4_FAN2_RPM": {
-                "path": "/run/devmap/sensors/FANTRAY4_FAN2/fan8_input",
+                "path": "/run/devmap/sensors/FAN/fan8_input",
                 "thresholdMap": {
                     "0": 13200,
                     "1": 3360,
@@ -1322,7 +1322,7 @@ std::string getSandiaConfig() {
         },
         "FANTRAY5": {
             "FANTRAY5_FAN1_PWM": {
-                "path": "/run/devmap/sensors/FANTRAY5_FAN1/pwm9",
+                "path": "/run/devmap/sensors/FAN/pwm9",
                 "thresholdMap": {
                     "0": 100,
                     "1": 40
@@ -1330,7 +1330,7 @@ std::string getSandiaConfig() {
                 "type": 5
             },
             "FANTRAY5_FAN1_RPM": {
-                "path": "/run/devmap/sensors/FANTRAY5_FAN1/fan9_input",
+                "path": "/run/devmap/sensors/FAN/fan9_input",
                 "thresholdMap": {
                     "0": 12430,
                     "1": 3164,
@@ -1340,7 +1340,7 @@ std::string getSandiaConfig() {
                 "type": 4
             },
             "FANTRAY5_FAN2_PWM": {
-                "path": "/run/devmap/sensors/FANTRAY5_FAN2/pwm10",
+                "path": "/run/devmap/sensors/FAN/pwm10",
                 "thresholdMap": {
                     "0": 100,
                     "1": 40
@@ -1348,7 +1348,7 @@ std::string getSandiaConfig() {
                 "type": 5
             },
             "FANTRAY5_FAN2_RPM": {
-                "path": "/run/devmap/sensors/FANTRAY5_FAN2/fan10_input",
+                "path": "/run/devmap/sensors/FAN/fan10_input",
                 "thresholdMap": {
                     "0": 13200,
                     "1": 3360,

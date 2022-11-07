@@ -29,13 +29,10 @@ Fpd_powercpld::program(bool force) const
             throw std::system_error(EPERM, std::generic_category(), info);
         }
     }
-    auto helper = fpd_t::helper();
-    std::vector <std::string> image_path = {fpd_t::path()};
+    std::string image_path = fpd_t::path();
+    uint16_t mdata_size = get_metadata_size(image_path.c_str());
 
-    auto mdata_size = get_metadata_size(image_path[0].c_str());
-    image_path.insert(image_path.begin(), std::to_string(mdata_size));
-
-    fpd_t::invoke(helper, image_path);
+    program_powercpld_image(mdata_size, image_path);
 }
 
 std::string 
