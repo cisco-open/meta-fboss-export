@@ -50,7 +50,8 @@ public:
     void printInfoJson() override {
         printInfoJson(std::cout);
     }
-    std::vector<std::pair<std::string, std::string>> getInfo() override;
+    bool verifyOptions(void) override;
+    std::vector<std::pair<std::string, std::string>> getInfo(std::string eeprom = "") override;
 
     void printInfo(std::ostream &s);
     void printInfoJson(std::ostream &s);

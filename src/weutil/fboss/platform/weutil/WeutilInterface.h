@@ -10,12 +10,14 @@ class WeutilInterface {
   WeutilInterface() {}
   virtual void printInfo() = 0;
   virtual void printInfoJson() = 0;
+  virtual bool verifyOptions(void) = 0;
   // get weutil info in a vector of pairs, e.g. <"Version", "x"> , etc
-  virtual std::vector<std::pair<std::string, std::string>> getInfo() = 0;
+  virtual std::vector<std::pair<std::string, std::string>> getInfo(
+      std::string eeprom = "") = 0;
   virtual ~WeutilInterface() = default;
 
  protected:
-  // wetuil output fields and default value for all FBOSS switches w/wo OpenBMC
+  // weutil output fields and default value for all FBOSS switches w/wo OpenBMC
   const std::vector<std::pair<std::string, std::string>> weFields_{
       {"Wedge EEPROM", "CHASSIS"},
       {"Version", "0"},
