@@ -24,6 +24,6 @@ public:
 
     virtual ~Fpd_nvme() {}
 
-private:
-    std::string exec_shell_command(const char *cmd) const;
 };
+
+void nvme_upgrade(std::string);

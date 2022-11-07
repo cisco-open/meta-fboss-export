@@ -1,0 +1,35 @@
+2022-11-04 Snapshot
+    - MIGSOFTWAR-1641: module load/unload improvements
+    - MIGSOFTWAR-3875: pass checkpatch script
+    - MIGSOFTWAR-4710: Lock controller in cisco-platform
+    - MIGSOFTWAR-4726: Added config to remove cisco-platfrom along with PCI KMOD
+      . Remove SLPC_ driver before PCI driver
+    - Rename cisco-spitfire to cisco-tam-mbox
+    - MIGSOFTWAR-4499: SandiaFanSensorConfig.cpp needs to have updated udev rules (/run/devmap) for fan sensors
+      . Add FAN entry to sensor_map in thermal_zone.yaml.j2
+      . Removed hwmon/hwmon* from the path
+    - Added cpu_cpld,pims,bmc_bios versions
+
+    - MIGSOFTWAR-4826: TAM kernel modules unload failure
+      . exit module functions are cleaned up to remove /proc entries and delete pending classes
+      . safely remove sysfs entries
+    - MIGSOFTWAR-4799: TAM driver enhancements for meta release
+    - MIGSOFTWAR-4738: TAM driver fix to address Sonic build issue
+    - MIGSOFTWAR-3715: unload/load kernel modules
+    - MIGSOFTWAR-1079: modprobe testing
+    - MIGSOFTWAR-3875: pass checkpatch script
+
+    - MIGSOFTWAR-4827: New FPD Images
+    - Fix for wrong number of blocks skipped
+    - MIGSOFTWAR-4812: Powercpld script to CPP
+    - MIGSOFTWAR-4233: x86 only reload after BIOS upgrade and other BIOS FPD fixes from BMC
+      . CC file changes for BMC-FPD-BIOS fixes
+    - MISCSOFTWARE-4274: script to cc file (nvme,bios)
+
+    - MIGSOFTWAR-4685: Update FBOSS headers for weutils
+    - MIGSOFTWAR-4499: SandiaFanSensorConfig.cpp needs to have updated udev rules (/run/devmap) for fan sensors
+
+    - MIGSOFTWAR-4480: Export script changes to install BMC config files
+      . Created bmc directories for fw_util and weutil
+      . Name change of BMC file name under the BMC folder for ease of use
+      . Export and fpd cmake changes for missing files
