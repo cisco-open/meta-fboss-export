@@ -22,3 +22,5 @@ public:
 
     virtual ~Fpd_powercpld() {}
 };
+
+void program_powercpld_image(uint16_t mdata_size, std::string image_path);

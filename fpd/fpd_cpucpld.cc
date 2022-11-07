@@ -19,7 +19,7 @@
 void
 Fpd_cpucpld::program(bool force) const
 {
-    unsigned int i2c_bus_no, device_address;
+    //unsigned int i2c_bus_no, device_address;
     std::filesystem::path fs_path = fpd_t::get_i2c_info();
     std::string device_path = fs_path.filename();
 
@@ -32,8 +32,8 @@ Fpd_cpucpld::program(bool force) const
         info.append(": Failed to get correct i2c device info");
         throw std::system_error(ENOTSUP, std::generic_category(), info);
     }
-    i2c_bus_no = std::stoul(device_path.substr(0, pos));
-    device_address = std::stoul(device_path.substr(pos+1), 0, 16);
+    //i2c_bus_no = std::stoul(device_path.substr(0, pos));
+    //device_address = std::stoul(device_path.substr(pos+1), 0, 16);
 
     auto image_path = fpd_t::path();
     int path_len = image_path.size();
@@ -42,8 +42,6 @@ Fpd_cpucpld::program(bool force) const
     path[path_len] = '\0';
 
     int ret = ENOTSUP; // cpld_upgrade(path, i2c_bus_no, device_address);
-    (void) i2c_bus_no;
-    (void) device_address;
     if (ret != 0) {
         std::string info(__func__);
         info.append(": Failed to Program CPU_CPLD");
