@@ -144,17 +144,17 @@ getSandiaFSConfig() {
         "fan_missing_val": 0,
         "fan_present_val": 1,
         "presence": {
-            "path": "/run/devmap/sensors/FANTRAY1_FAN1/device/fan0_presence",
+            "path": "/run/devmap/sensors/FAN/device/fan0_presence",
             "source": "sysfs"
         },
         "pwm": {
-            "path": "/run/devmap/sensors/FANTRAY1_FAN1/pwm1",
+            "path": "/run/devmap/sensors/FAN/pwm1",
             "source": "sysfs"
         },
         "pwm_range_max": 100,
         "pwm_range_min": 1,
         "rpm": {
-            "path": "/run/devmap/sensors/FANTRAY1_FAN1/fan1_input",
+            "path": "/run/devmap/sensors/FAN/fan1_input",
             "source": "sysfs"
         }
     },
@@ -162,17 +162,17 @@ getSandiaFSConfig() {
         "fan_missing_val": 0,
         "fan_present_val": 1,
         "presence": {
-            "path": "/run/devmap/sensors/FANTRAY1_FAN2/device/fan0_presence",
+            "path": "/run/devmap/sensors/FAN/device/fan0_presence",
             "source": "sysfs"
         },
         "pwm": {
-            "path": "/run/devmap/sensors/FANTRAY1_FAN2/pwm2",
+            "path": "/run/devmap/sensors/FAN/pwm2",
             "source": "sysfs"
         },
         "pwm_range_max": 100,
         "pwm_range_min": 1,
         "rpm": {
-            "path": "/run/devmap/sensors/FANTRAY1_FAN2/fan2_input",
+            "path": "/run/devmap/sensors/FAN/fan2_input",
             "source": "sysfs"
         }
     },
@@ -180,17 +180,17 @@ getSandiaFSConfig() {
         "fan_missing_val": 0,
         "fan_present_val": 1,
         "presence": {
-            "path": "/run/devmap/sensors/FANTRAY2_FAN1/device/fan1_presence",
+            "path": "/run/devmap/sensors/FAN/device/fan1_presence",
             "source": "sysfs"
         },
         "pwm": {
-            "path": "/run/devmap/sensors/FANTRAY2_FAN1/pwm3",
+            "path": "/run/devmap/sensors/FAN/pwm3",
             "source": "sysfs"
         },
         "pwm_range_max": 100,
         "pwm_range_min": 1,
         "rpm": {
-            "path": "/run/devmap/sensors/FANTRAY2_FAN1/fan3_input",
+            "path": "/run/devmap/sensors/FAN/fan3_input",
             "source": "sysfs"
         }
     },
@@ -198,17 +198,17 @@ getSandiaFSConfig() {
         "fan_missing_val": 0,
         "fan_present_val": 1,
         "presence": {
-            "path": "/run/devmap/sensors/FANTRAY2_FAN2/device/fan1_presence",
+            "path": "/run/devmap/sensors/FAN/device/fan1_presence",
             "source": "sysfs"
         },
         "pwm": {
-            "path": "/run/devmap/sensors/FANTRAY2_FAN2/pwm4",
+            "path": "/run/devmap/sensors/FAN/pwm4",
             "source": "sysfs"
         },
         "pwm_range_max": 100,
         "pwm_range_min": 1,
         "rpm": {
-            "path": "/run/devmap/sensors/FANTRAY2_FAN2/fan4_input",
+            "path": "/run/devmap/sensors/FAN/fan4_input",
             "source": "sysfs"
         }
     },
@@ -216,17 +216,17 @@ getSandiaFSConfig() {
         "fan_missing_val": 0,
         "fan_present_val": 1,
         "presence": {
-            "path": "/run/devmap/sensors/FANTRAY3_FAN1/device/fan2_presence",
+            "path": "/run/devmap/sensors/FAN/device/fan2_presence",
             "source": "sysfs"
         },
         "pwm": {
-            "path": "/run/devmap/sensors/FANTRAY3_FAN1/pwm5",
+            "path": "/run/devmap/sensors/FAN/pwm5",
             "source": "sysfs"
         },
         "pwm_range_max": 100,
         "pwm_range_min": 1,
         "rpm": {
-            "path": "/run/devmap/sensors/FANTRAY3_FAN1/fan5_input",
+            "path": "/run/devmap/sensors/FAN/fan5_input",
             "source": "sysfs"
         }
     },
@@ -234,17 +234,17 @@ getSandiaFSConfig() {
         "fan_missing_val": 0,
         "fan_present_val": 1,
         "presence": {
-            "path": "/run/devmap/sensors/FANTRAY3_FAN2/device/fan2_presence",
+            "path": "/run/devmap/sensors/FAN/device/fan2_presence",
             "source": "sysfs"
         },
         "pwm": {
-            "path": "/run/devmap/sensors/FANTRAY3_FAN2/pwm6",
+            "path": "/run/devmap/sensors/FAN/pwm6",
             "source": "sysfs"
         },
         "pwm_range_max": 100,
         "pwm_range_min": 1,
         "rpm": {
-            "path": "/run/devmap/sensors/FANTRAY3_FAN2/fan6_input",
+            "path": "/run/devmap/sensors/FAN/fan6_input",
             "source": "sysfs"
         }
     },
@@ -252,17 +252,17 @@ getSandiaFSConfig() {
         "fan_missing_val": 0,
         "fan_present_val": 1,
         "presence": {
-            "path": "/run/devmap/sensors/FANTRAY4_FAN1/device/fan3_presence",
+            "path": "/run/devmap/sensors/FAN/device/fan3_presence",
             "source": "sysfs"
         },
         "pwm": {
-            "path": "/run/devmap/sensors/FANTRAY4_FAN1/pwm7",
+            "path": "/run/devmap/sensors/FAN/pwm7",
             "source": "sysfs"
         },
         "pwm_range_max": 100,
         "pwm_range_min": 1,
         "rpm": {
-            "path": "/run/devmap/sensors/FANTRAY4_FAN1/fan7_input",
+            "path": "/run/devmap/sensors/FAN/fan7_input",
             "source": "sysfs"
         }
     },
@@ -270,17 +270,17 @@ getSandiaFSConfig() {
         "fan_missing_val": 0,
         "fan_present_val": 1,
         "presence": {
-            "path": "/run/devmap/sensors/FANTRAY4_FAN2/device/fan3_presence",
+            "path": "/run/devmap/sensors/FAN/device/fan3_presence",
             "source": "sysfs"
         },
         "pwm": {
-            "path": "/run/devmap/sensors/FANTRAY4_FAN2/pwm8",
+            "path": "/run/devmap/sensors/FAN/pwm8",
             "source": "sysfs"
         },
         "pwm_range_max": 100,
         "pwm_range_min": 1,
         "rpm": {
-            "path": "/run/devmap/sensors/FANTRAY4_FAN2/fan8_input",
+            "path": "/run/devmap/sensors/FAN/fan8_input",
             "source": "sysfs"
         }
     },
@@ -288,17 +288,17 @@ getSandiaFSConfig() {
         "fan_missing_val": 0,
         "fan_present_val": 1,
         "presence": {
-            "path": "/run/devmap/sensors/FANTRAY5_FAN1/device/fan4_presence",
+            "path": "/run/devmap/sensors/FAN/device/fan4_presence",
             "source": "sysfs"
         },
         "pwm": {
-            "path": "/run/devmap/sensors/FANTRAY5_FAN1/pwm9",
+            "path": "/run/devmap/sensors/FAN/pwm9",
             "source": "sysfs"
         },
         "pwm_range_max": 100,
         "pwm_range_min": 1,
         "rpm": {
-            "path": "/run/devmap/sensors/FANTRAY5_FAN1/fan9_input",
+            "path": "/run/devmap/sensors/FAN/fan9_input",
             "source": "sysfs"
         }
     },
@@ -306,17 +306,17 @@ getSandiaFSConfig() {
         "fan_missing_val": 0,
         "fan_present_val": 1,
         "presence": {
-            "path": "/run/devmap/sensors/FANTRAY5_FAN2/device/fan4_presence",
+            "path": "/run/devmap/sensors/FAN/device/fan4_presence",
             "source": "sysfs"
         },
         "pwm": {
-            "path": "/run/devmap/sensors/FANTRAY5_FAN2/pwm10",
+            "path": "/run/devmap/sensors/FAN/pwm10",
             "source": "sysfs"
         },
         "pwm_range_max": 100,
         "pwm_range_min": 1,
         "rpm": {
-            "path": "/run/devmap/sensors/FANTRAY5_FAN2/fan10_input",
+            "path": "/run/devmap/sensors/FAN/fan10_input",
             "source": "sysfs"
         }
     }

@@ -89,6 +89,12 @@ fpd_t::get_activate_path() const
     return m_activate_path;
 }
 
+std::string
+fpd_t::get_expected_version() const
+{
+    return m_expected_version;
+}
+
 void
 fpd_t::set_activate_path_value(const std::filesystem::path &value) const
 {
@@ -127,6 +133,12 @@ fpd_t::operator std::string() const
         result.append(osep)
               .append("alt_path ")
               .append(m_alt_path);
+        osep = ", ";
+    }
+    if (!m_expected_version.empty()) {
+        result.append(osep)
+              .append("expected_version ")
+              .append(m_expected_version);
         osep = ", ";
     }
     if (!m_helper.empty()) {
@@ -380,6 +392,7 @@ to_json(json& j, const fpd_t& obj)
              {"dllpath", obj.m_dllpath},
              {"dllsymbol", obj.m_dllsymbol},
              {"golden", obj.m_golden},
+             {"expected_version", obj.m_expected_version},
              {"offsets", obj.m_offsets}
             };
 }
@@ -403,6 +416,7 @@ from_json(const json& j, fpd_t& obj)
     obj.m_dllpath = j.value("dllpath", "");
     obj.m_dllsymbol = j.value("dllsymbol", "");
     obj.m_golden = j.value("golden", false);
+    obj.m_expected_version = j.value("expected_version", "");
 
     if (j.contains("offsets")) {
         j.at("offsets").get_to(obj.m_offsets);
