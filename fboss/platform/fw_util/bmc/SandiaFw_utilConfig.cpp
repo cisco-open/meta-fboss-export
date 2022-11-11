@@ -42,6 +42,24 @@ std::string getSandiaFpdsData() {
                 }
             ],
             "path": "/mnt/data1/fpd/spf_scm_bios_upgrade.img"
+        },
+        {
+            "description": "CPU CPLD",
+            "dllpath": "/opt/cisco/lib/libfpd_cpucpld.so.1.0.1",
+            "dllsymbol": "get_fpd_obj_cpucpld",
+            "fw_ver_path": "/sys/bus/platform/devices/msd/status4",
+            "match": [],
+            "name": "CPU_CPLD",
+            "oid": {
+                "index": 2,
+                "type": "fpd"
+            },
+            "parents": [
+                {
+                    "index": 1,
+                    "type": "platform"
+                }
+            ]
         }
     ],
     "pid": "85_SCM_O_BMC"
