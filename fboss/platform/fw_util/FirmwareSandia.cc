@@ -16,13 +16,12 @@
 
 #include "fw_util.h"
 #include "bsp/find.h"
+#include "SandiaFw_utilConfig.h"
 
-namespace facebook::fboss::platform {
-
-std::string getSandiaFpdsData();
+namespace facebook::fboss::platform::fw_util {
 
 void
-fw_util::init_sandia()
+init_sandia()
 {
     std::string platform = getSandiaFpdsData();
     bsp2::load<bsp2::fpd_t>(platform);

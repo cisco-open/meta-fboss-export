@@ -34,8 +34,9 @@ Fpd_nvme::program(bool force) const
 {
     auto helper = fpd_t::helper();
     std::vector <std::string> image_path = {fpd_t::path()};
+    std::string pid = "85-SCM-O-BMC";
 
-    nvme_upgrade(image_path[0]);
+    nvme_upgrade(image_path[0], pid);
 }
 
 void

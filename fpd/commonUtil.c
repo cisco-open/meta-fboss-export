@@ -1,3 +1,9 @@
+/*
+ * commonUtil.c
+ *
+ * Copyright (c) 2022 by Cisco Systems, Inc.
+ * All rights reserved.
+ */
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -19,6 +25,7 @@
 #include <sys/mman.h>
 #include <dlfcn.h>
 #include <fcntl.h>
+#include <zlib.h>
 #include "commonUtil.h"
 
 #define FPRINTF(out, ...) //fprintf(out, __VA_ARGS__)
@@ -33,9 +40,58 @@
 
 typedef uint32_t cpa_status_t;
 
-int get_img_metadata(const char *path, uint32_t *img_size, void **img,
-                     uint32_t *mdata_size, void **mdata, char *err_msg,
-                     uint32_t msg_size) {
+int
+get_img_data(const char *path, void **data, uint32_t *data_size,
+             char *err_msg, uint32_t msg_size)
+{
+    struct stat st;
+    int rc = 0;
+    FILE *fp;
+    uint32_t size;
+
+    fp = fopen(path, "rb");
+    if (fp == NULL) {
+        snprintf(err_msg, msg_size, "Failed to open file path %s", path);
+        return EINVAL;
+    }
+
+    rc = stat(path, &st);
+    if (rc) {
+        snprintf(err_msg, msg_size, "stat failed");
+        return EINVAL;
+    }
+
+    size = st.st_size;
+    *data_size = size;
+
+    /* allocate memory for metadata */
+    *data = (uint8_t *)calloc(1, size);
+    if (*data == NULL) {
+        snprintf(err_msg, msg_size, "failed to allocate memory for metadata");
+        return ENOMEM;
+    }
+
+    fseek(fp, 0, SEEK_SET);
+
+    /* read meta data */
+    rc = fread(*data, size, 1, fp);
+    if (rc == 0) {
+        FPRINTF(stderr, "fread %d\n", rc);
+        fclose(fp);
+        free(*data);
+        snprintf(err_msg, msg_size, "failed to read mdata");
+        return errno;
+    }
+    fclose(fp);
+
+    return 0;
+}
+
+int
+get_img_metadata(const char *path, uint32_t *img_size, void **img,
+                 uint32_t *mdata_size, void **mdata, char *err_msg,
+                 uint32_t msg_size)
+{
   struct stat st;
   uint8_t *image;
   uint8_t *metadata;
@@ -132,7 +188,243 @@ int get_img_metadata(const char *path, uint32_t *img_size, void **img,
   return 0;
 }
 
-uint8_t fpd_mdata_get_fpd_version(void *mdata, fpd_version_t *fpd_version) {
+int
+get_data_info(void *data, fpd_meta_info_t *fpd_meta,
+              char *err_msg, uint32_t msg_size)
+{
+    fpd_meta_data_t *fpd_mdata = data;
+    int rc = 0;
+
+    switch (fpd_mdata->hdr.u.v1.metadata_version) {
+    case FPD_META_DATA_VER_1:
+        fpd_meta->mdata = data;
+        fpd_meta->mdata_size = fpd_mdata->hdr.u.v1.metadata_size;
+
+        fpd_mdata_data_v1_t *data_v1 =
+            (fpd_mdata_data_v1_t *)((uint8_t *)(data) +
+                                    sizeof(fpd_mdata_hdr_v1_t));
+        fpd_meta->img_msize = data_v1->object_size;
+        fpd_meta->img = data + fpd_meta->mdata_size;
+        fpd_meta->mver = FPD_META_DATA_VER_1;
+        fpd_meta->version_string = data_v1->object_version_str;
+        break;
+    case FPD_META_DATA_VER_2:
+        fpd_meta->mdata = data;
+        fpd_meta->mdata_size = fpd_mdata->hdr.u.v2.metadata_size;
+
+        fpd_mdata_data_v2_t *data_v2 =
+            (fpd_mdata_data_v2_t *)((uint8_t *)(data) +
+                                    sizeof(fpd_mdata_hdr_v2_t));
+        fpd_meta->img_msize = data_v2->fw_size;
+        fpd_meta->img = data + fpd_meta->mdata_size;
+        fpd_meta->mver = FPD_META_DATA_VER_2;
+        fpd_meta->version = data_v2->fpd_ver;
+        fpd_meta->flags = data_v2->user_flags;
+        fpd_meta->flags = data_v2->user_flags;
+        fpd_meta->version_string = data_v2->fpd_ver_str;
+        fpd_meta->md5 = data_v2->fw_md5;
+
+        if (data_v2->fw_type == FPD_FW_TYPE_GZIP) {
+            fpd_meta->compressed = 1;
+        } else {
+            fpd_meta->compressed = 0;
+        }
+        break;
+    case FPD_META_DATA_VER_3:
+        fpd_meta->mdata = data;
+        fpd_meta->mdata_size = fpd_mdata->hdr.u.v3.metadata_size;
+
+        fpd_mdata_data_v3_t *data_v3 =
+            (fpd_mdata_data_v3_t *)((uint8_t *)(data) +
+                                    sizeof(fpd_mdata_hdr_v3_t));
+        fpd_meta->img_msize = data_v3->fw_size;
+        fpd_meta->img = data + fpd_meta->mdata_size;
+        fpd_meta->mver = FPD_META_DATA_VER_3;
+        fpd_meta->version = data_v3->fpd_ver;
+        fpd_meta->flags = data_v3->user_flags;
+        fpd_meta->flags = data_v3->user_flags;
+        fpd_meta->version_string = data_v3->fpd_ver_str;
+        fpd_meta->md5 = data_v3->fw_md5;
+
+        if (data_v3->fw_type == FPD_FW_TYPE_GZIP) {
+            fpd_meta->compressed = 1;
+        } else {
+            fpd_meta->compressed = 0;
+        }
+        break;
+    default:
+        FPRINTF(stderr, "Only support version 3 version is %d\n",
+            fpd_mdata->hdr.u.v1.metadata_version);
+        return ENODATA;
+        break;
+    }
+
+    rc = get_image_lists(fpd_meta->mdata, fpd_meta->mdata_size,
+                         &fpd_meta->pid_size, &fpd_meta->pid_list,
+                         &fpd_meta->name_size, &fpd_meta->name_list);
+    if (rc) {
+        FPRINTF(stderr, "Unable to get pid/name lists %d\n", rc);
+        return rc;
+    }
+    return 0;
+
+}
+
+int
+img_inflate(fpd_meta_info_t *fpd_meta, void **data,
+              char *err_msg, uint32_t msg_size)
+{
+    int rc;
+    z_stream d_stream;
+    uint32_t size = fpd_meta->img_msize;
+
+    if (!fpd_meta->compressed) {
+        *data = fpd_meta->img;
+        return 0;
+    }
+    *data = calloc(size, 1);
+
+    memset(&d_stream, 0, sizeof(z_stream));
+    d_stream.avail_in = fpd_meta->img_size;
+    d_stream.next_in = fpd_meta->img;
+    d_stream.next_out = *data;
+    d_stream.avail_out = fpd_meta->img_msize;
+
+    rc = inflateInit(&d_stream);
+
+    if (rc) {
+        FPRINTF(stderr, "inflateInit %d\n", rc);
+        free(*data);
+        return rc;
+    }
+    while (1) {
+        rc = inflate(&d_stream, Z_NO_FLUSH);
+        if (rc != Z_OK) {
+            break;
+        }
+    }
+
+    if (rc != Z_STREAM_END){
+        FPRINTF(stderr, "Stream end failure %d\n", rc);
+        free(*data);
+        return rc;
+    }
+    rc = inflateEnd(&d_stream);
+    if (rc) {
+        FPRINTF(stderr, "inflateEnd failed %d\n", rc);
+        free(*data);
+    }
+    return rc;
+}
+
+int
+get_imgs_info(const char *name, fpd_imgs_t **imgs,
+              char *err_msg, uint32_t msg_size)
+{
+    uint32_t *magic;
+    fpd_imgs_t *fpd_imgs;
+    void *data;
+    uint32_t data_size;
+    int rc;
+
+    rc = get_img_data(name, &data, &data_size, err_msg, msg_size);
+    if (rc) {
+        FPRINTF(stderr, "get_data_info failed %d\n", rc);
+        return rc;
+    }
+    magic = data;
+    if (*magic == FPD_FILE_LIST_MAGIC) {
+        fpd_images_hdr_v1_t *fip = data;
+        uint32_t offset = fip->hdr_size;
+        int i;
+        *imgs = calloc(sizeof(fpd_imgs_t) +
+             fip->num_images * sizeof(fpd_meta_info_t), 1);
+        fpd_imgs = *imgs;
+        fpd_imgs->magic = *magic;
+        fpd_imgs->num_imgs = fip->num_images;
+        for (i = 0; i < fip->num_images; i++) {
+            fpd_imgs->meta[i].img_size = fip->image_sizes[i];
+            fpd_imgs->meta[i].img = data + offset;
+            offset += fip->image_sizes[i];
+            rc = get_data_info(fpd_imgs->meta[i].img, &fpd_imgs->meta[i],
+                               err_msg, msg_size);
+            if (rc) {
+                FPRINTF(stderr, "get_data_info failed %d\n", rc);
+                free(*imgs);
+                return rc;
+            }
+            fpd_imgs->meta[0].img_size = fip->image_sizes[i] -
+                fpd_imgs->meta[0].mdata_size;
+        }
+    } else {
+        *imgs = calloc(sizeof(fpd_imgs_t) + sizeof(fpd_meta_info_t), 1);
+        fpd_imgs = *imgs;
+        fpd_imgs->num_imgs = 1;
+        fpd_imgs->meta[0].img = data;
+        rc = get_data_info(fpd_imgs->meta[0].img, &fpd_imgs->meta[0],
+                           err_msg, msg_size);
+        if (rc) {
+            FPRINTF(stderr, "get_data_info failed %d\n", rc);
+            free(*imgs);
+            return rc;
+        }
+        fpd_imgs->meta[0].img_size = data_size - fpd_imgs->meta[0].mdata_size;
+    }
+    fpd_imgs->name = name;
+    fpd_imgs->size = data_size;
+    *imgs = fpd_imgs;
+    return rc;
+}
+
+int
+fpd_find_img(fpd_imgs_t *fpd_imgs, const char *pid, char *name, char *name2)
+{
+    fpd_meta_info_t **match_list = calloc(sizeof(fpd_meta_info_t *),
+           fpd_imgs->num_imgs);
+    uint32_t match_count = 0;
+    int i, j;
+
+    for (i = 0; i < fpd_imgs->num_imgs; i++) {
+        fpd_meta_info_t *info = &fpd_imgs->meta[i];
+        if (pid) {
+            for (j = 0; j < info->pid_size; j++) {
+                if (!strncmp(info->pid_list[j], pid, S_IDPROM_PRODUCT_ID_MAX+1)) {
+                    info->match_flags |= PID_MATCH_FLAG;
+                    break;
+                }
+            }
+        } else {
+            info->match_flags |= PID_MATCH_FLAG;
+        }
+        for (j = 0; j < info->name_size; j++) {
+            if (!(info->match_flags & NAME_MATCH_FLAG) && name) {
+                if (!strncmp(info->name_list[j], name, MAX_FPD_NAME_LEN)) {
+                    info->match_flags |= NAME_MATCH_FLAG;
+                }
+            } else if (!name) {
+                info->match_flags |= NAME_MATCH_FLAG;
+            }
+            if (!(info->match_flags & NAME2_MATCH_FLAG) && name2) {
+                if (!strncmp(info->name_list[j], name2, MAX_FPD_NAME_LEN)) {
+                    info->match_flags |= NAME2_MATCH_FLAG;
+                }
+            } else if (!name2) {
+                info->match_flags |= NAME2_MATCH_FLAG;
+            }
+        }
+        if ((info->match_flags & FULL_MATCH) == FULL_MATCH) {
+            match_list[match_count++] = info;
+        }
+        FPRINTF(stdout, "%s 0x%08x\n", info->name_list[0], info->match_flags);
+    }
+    fpd_imgs->match_list = match_list;
+    fpd_imgs->match_count = match_count;
+    return match_count;
+}
+
+uint8_t
+fpd_mdata_get_fpd_version(void *mdata, fpd_version_t *fpd_version)
+{
   uint8_t rc = 0;
   fpd_meta_data_t *metadata = (fpd_meta_data_t *)mdata;
 
@@ -200,7 +492,9 @@ uint8_t fpd_mdata_get_fpd_version(void *mdata, fpd_version_t *fpd_version) {
   return rc;
 }
 
-uint32_t get_metadata_size(const char *file_name){
+uint32_t
+get_metadata_size(const char *file_name)
+{
   
     uint8_t *image, *mdata;
     uint32_t image_size, mdata_size;
@@ -217,7 +511,6 @@ uint32_t get_metadata_size(const char *file_name){
     }
     
     return mdata_size;
-
 }
 
 uint32_t get_image_version(const char *file_name) {
@@ -249,6 +542,119 @@ uint32_t get_image_version(const char *file_name) {
   return fpd_image_version;
 }
 
+int
+get_image_lists(void *mdata, uint32_t mdata_size, 
+                uint32_t *pid_size, char ***pid_list,
+                uint32_t *name_size, char ***name_list)
+{
+    int rc = 0;
+    fpd_meta_data_t *metadata = (fpd_meta_data_t *)mdata;
+    uint32_t num_pid = 0;
+    char **lpid_list = NULL;
+    uint32_t num_name = 0;
+    char **lname_list = NULL;
+    uint32_t i;
+
+    if (!mdata) {
+        FPRINTF(stderr, "%s bad mdata\n", __FUNCTION__);
+        return -EFAULT;
+    }
+    FPRINTF(stderr, "%s start\n", __FUNCTION__);
+    switch (metadata->hdr.u.v1.metadata_version) {
+    default:
+        FPRINTF(stderr, "V1 header not supported %s\n", __FUNCTION__);
+        return -EFAULT;
+
+    case FPD_META_DATA_VER_1:;
+        break;
+    case FPD_META_DATA_VER_2:;
+        if (metadata->hdr.u.v2.magic_num != FPD_METADATA_MAGIC_NUM_V2) {
+            FPRINTF(stderr, "Magic number failed v2 %d\n", EFAULT);
+            return -EFAULT;
+        }
+        fpd_mdata_data_v2_t *data_v2 =
+            (fpd_mdata_data_v2_t *)((uint8_t *)(metadata) +
+                                    sizeof(fpd_mdata_hdr_v2_t));
+
+        num_pid = data_v2->card_info_hdr.num_card_info;
+        lpid_list = calloc(sizeof(char *), num_pid);
+        for (i = 0; i < num_pid; i++) {
+            lpid_list[i] = data_v2->card_info[i].card_pid;
+        }
+        break;
+
+    case FPD_META_DATA_VER_3:
+        if (metadata->hdr.u.v3.magic_num != FPD_METADATA_MAGIC_NUM_V3) {
+            FPRINTF(stderr, "Magic number failed v3 %d\n", EFAULT);
+            return -EFAULT;
+        }
+        fpd_mdata_data_v3_t *data_v3 =
+            (fpd_mdata_data_v3_t *)((uint8_t *)(metadata) +
+                                    sizeof(fpd_mdata_hdr_v3_t));
+        fpd_mdata_card_info_t *card = data_v3->card_info;
+        fpd_mdata_name_info_t *name;
+
+        num_pid = data_v3->card_info_hdr.num_card_info;
+        lpid_list = calloc(sizeof(char *), num_pid);
+        for (i = 0; i < num_pid; i++) {
+            lpid_list[i] = card->card_pid;
+            card++;
+        }
+        // card now points to name!
+        name = (fpd_mdata_name_info_t *) card;
+
+        num_name = name->num_fpd_names;
+        lname_list = calloc(sizeof(char *), num_name);
+        for (i = 0; i < num_name; i++) {
+            lname_list[i] = name->name[i];
+        }
+        break;
+    }
+    *pid_size = num_pid;
+    *name_size = num_name;
+    *pid_list = lpid_list;
+    *name_list = lname_list;
+    FPRINTF(stderr, "%s end\n", __FUNCTION__);
+    return rc;
+}
+
+void
+fpd_print_meta_info(fpd_meta_info_t *fpd)
+{
+    int i;
+
+    printf("mdata ver: %d size: 0x%x image ver %d.%d.%d size: 0x%x (0x%x)\n",
+        fpd->mver, fpd->mdata_size,
+        fpd->version.major, fpd->version.minor, fpd->version.debug,
+        fpd->img_size, fpd->img_msize);
+    printf(" -- flags: 0x%08x compressed: %s\n",
+        fpd->flags, fpd->compressed ? "Yes" : "No");
+
+    printf(" MD5: ");
+    for (i = 0; i < MAX_MD5_DIGEST; i++) {
+        printf("%02x", fpd->md5[i]);
+    }
+    printf("\n");
+    for (i = 0; i < fpd->pid_size; i++) {
+        printf(" PID:    %s\n", fpd->pid_list[i]);
+    }
+    for (i = 0; i < fpd->name_size; i++) {
+        printf(" NAME:   %s\n", fpd->name_list[i]);
+    }
+}
+
+void
+fpd_print_imgs_info(fpd_imgs_t *fpd_imgs)
+{
+    int i;
+    printf("num_images: %d image_name: %s image_size: 0x%x\n",
+        fpd_imgs->num_imgs, fpd_imgs->name, fpd_imgs->size);
+    printf("===================================================\n");
+    for (i = 0; i < fpd_imgs->num_imgs; i++) {
+        fpd_print_meta_info(&fpd_imgs->meta[i]);
+        printf("===================================================\n");
+    }
+}
 
 /*
  * This API allows to get output of a shell command with proper return code

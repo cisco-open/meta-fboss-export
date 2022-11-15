@@ -1,7 +1,6 @@
 # fw_util
 
-add_executable(fw_util
-    src/fw_util/fw_util.cc
+add_library(fw_util
     src/fw_util/FirmwareExport.cc
     fboss/platform/fw_util/FirmwareUpgrade.cc
     fboss/platform/fw_util/FirmwareSandia.cc
@@ -17,6 +16,7 @@ target_link_libraries(fw_util
     gflags
     glog
     stdc++fs
+    z
 )
 target_include_directories(fw_util
     PUBLIC
@@ -29,7 +29,7 @@ target_include_directories(fw_util
 )
 install(
     TARGETS fw_util
-    DESTINATION opt/cisco/bin
+    DESTINATION opt/cisco/lib
     PERMISSIONS OWNER_READ OWNER_EXECUTE
                 GROUP_READ GROUP_EXECUTE
                 WORLD_EXECUTE

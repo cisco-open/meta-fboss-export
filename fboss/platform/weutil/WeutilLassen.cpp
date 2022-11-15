@@ -20,13 +20,13 @@
 #include <string>
 
 #include "fboss/platform/weutil/WeutilPlatform.h"
+#include "fboss/platform/weutil/WeutilConfig.h"
+#include "fboss/platform/weutil/LassenWeutilConfig.h"
 
 using json = nlohmann::json;
 
 namespace facebook::fboss::platform {
 
-std::string getLassenIdpromsData();
-std::string getIdpromsData();
 
 std::unique_ptr<WeutilInterface>
 get_lassen_weutil()

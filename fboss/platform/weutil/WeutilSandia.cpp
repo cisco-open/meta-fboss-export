@@ -20,13 +20,12 @@
 #include <string>
 
 #include "fboss/platform/weutil/WeutilPlatform.h"
+#include "fboss/platform/weutil/WeutilConfig.h"
+#include "fboss/platform/weutil/SandiaWeutilConfig.h"
 
 using json = nlohmann::json;
 
 namespace facebook::fboss::platform {
-
-std::string getSandiaIdpromsData();
-std::string getIdpromsData();
 
 std::unique_ptr<WeutilInterface>
 get_sandia_weutil()

@@ -1,3 +1,9 @@
+/*
+ * commonUtil.h
+ *
+ * Copyright (c) 2022 by Cisco Systems, Inc.
+ * All rights reserved.
+ */
 #ifndef _COMMONFPD_UTIL_H_
 #define _COMMONFPD_UTIL_H_
 
@@ -25,8 +31,9 @@
 #define MAX_FPGA_FLASH_OBJ_BUILD_USER_STR_LEN   12
 
 #define FPD_METADATA_MAGIC_NUM      0xDDB2DDB3
-#define FPD_METADATA_MAGIC_NUM_V2   0x66706431
-#define FPD_METADATA_MAGIC_NUM_V3   0x66706432
+#define FPD_METADATA_MAGIC_NUM_V2   0x66706431 /* fpd1 */
+#define FPD_METADATA_MAGIC_NUM_V3   0x66706432 /* fpd2 */
+#define FPD_FILE_LIST_MAGIC         0x696d6773 /* imgs */
 
 #define MAX_FPD_NAME_LEN        17
 #define MAX_FPD_VER_STR_LEN     16
@@ -43,6 +50,14 @@
 #define SLPC_MEMORY_BASE            0x401000
 #define SLPC_MEMORY_OFFSET          0x40100
 #define PINPOINTER_SPI_BLOCK_ADDR   0x32000
+
+typedef struct fpd_images_hdr_v1_ {
+    uint32_t magic_num;
+    uint16_t ver;
+    uint16_t num_images;
+    uint32_t hdr_size;
+    uint32_t image_sizes[0];
+} __attribute__((__packed__)) fpd_images_hdr_v1_t;
 
 typedef struct fpd_mdata_hdr_v1_ {
     /*
@@ -238,9 +253,12 @@ typedef struct fpd_mdata_card_info_hdr_ {
 /*
  * Card info to define
  */
+#define S_IDPROM_PRODUCT_ID_MAX  18  /* PID Max Length                 */
 typedef struct fpd_mdata_card_info_ {
+    char card_pid[S_IDPROM_PRODUCT_ID_MAX+1];
     uint32_t platform_id;
-    fpd_card_version_t hw_ver;
+    fpd_card_version_t min_hw_ver;
+    fpd_card_version_t max_hw_ver;
 } __attribute__((__packed__)) fpd_mdata_card_info_t;
 
 /*
@@ -413,8 +431,77 @@ uint32_t get_metadata_size(const char *file_name);
 
 uint32_t get_image_version(const char *file_name);
 
+#define FPD_MDATA_MAX_LIST  16
+#define PID_MATCH_FLAG      0x0001
+#define NAME_MATCH_FLAG     0x0002
+#define NAME2_MATCH_FLAG    0x0004
+#define FULL_MATCH          (PID_MATCH_FLAG | NAME_MATCH_FLAG | NAME2_MATCH_FLAG)
+
+typedef struct fpd_meta_info_t_ {
+    uint32_t img_size;
+    uint32_t img_msize;
+    void *img;
+    uint32_t mdata_size;
+    void *mdata;
+    uint32_t mver;
+
+    uint32_t match_flags;
+    uint32_t flags;
+    fpd_version_t version;
+    char *version_string;
+    uint32_t compressed;
+    uint32_t pid_size;
+    char **pid_list;
+    uint32_t name_size;
+    char **name_list;
+    uint8_t *md5;
+} fpd_meta_info_t;
+
+typedef struct fpd_imgs_ {
+    uint32_t num_imgs;
+    uint32_t size;
+    uint32_t magic;
+    const char *name;
+    fpd_meta_info_t **match_list;
+    uint32_t match_count;
+    fpd_meta_info_t meta[0];
+} fpd_imgs_t;
+
+/*
+ * If meta version is 2 or 3 validate version, else return error EBADR.
+ * Check magic number, if good fill in size, pid_list, return 0
+ * Else return EFAULT
+ * meta_data: PID
+ */
+int
+get_image_lists(void *mdata, uint32_t mdata_size,
+                uint32_t *pid_size, char ***pid_list,
+                uint32_t *name_size, char ***name_list);
+
 uint16_t get_cpld_version(uint64_t block_offset, uint64_t version_mask,
                           uint32_t target, uint16_t reg_shift);
+
+int get_img_data(const char *path, void **data, uint32_t *data_size,
+                 char *err_msg, uint32_t msg_size);
+
+int get_data_info(void *data, fpd_meta_info_t *fpd_meta,
+                  char *err_msg, uint32_t msg_size);
+
+int get_imgs_info(const char *name, fpd_imgs_t **imgs,
+                  char *err_msg, uint32_t msg_size);
+
+int get_img_metadata(const char *path, uint32_t *img_size, void **img,
+                     uint32_t *mdata_size, void **mdata, char *err_msg,
+                     uint32_t msg_size);
+
+int img_inflate(fpd_meta_info_t *fpd_meta, void **data,
+                char *err_msg, uint32_t msg_size);
+
+int fpd_find_img(fpd_imgs_t *fpd_imgs, const char *pid, char *name, char *name2);
+
+void fpd_print_meta_info(fpd_meta_info_t *fpd);
+void fpd_print_imgs_info(fpd_imgs_t *fpd_imgs);
+
 #ifdef __cplusplus
 }
 #endif
@@ -422,10 +509,6 @@ uint16_t get_cpld_version(uint64_t block_offset, uint64_t version_mask,
 void * get_pinpointer_block_virtual_addr(int pim, uint64_t block_offset);
 
 void * get_cyclonus_block_virtual_addr(uint64_t block_offset);
-
-int get_img_metadata(const char *path, uint32_t *img_size, void **img,
-                     uint32_t *mdata_size, void **mdata, char *err_msg,
-                     uint32_t msg_size);
 
 uint8_t fpd_mdata_get_fpd_version(void *mdata,
                                   fpd_version_t *fpd_version);

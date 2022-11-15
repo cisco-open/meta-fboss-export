@@ -105,12 +105,14 @@ Fpd_bmc_bios::get_bios_version_from_spiflash() const
     if (rc) {
         std::string err_msg = "Unable to get size of file ";
         err_msg.append(BIOS_MTD_INFO_FILE);
+        unselect_mux();
         throw std::runtime_error(err_msg);
     }
 
     if (img_statbuf.st_size == 0) {
         std::string err_msg = BIOS_MTD_INFO_FILE;
         err_msg.append(" file is empty");
+        unselect_mux();
         throw std::runtime_error(err_msg);
     }
 
@@ -118,12 +120,14 @@ Fpd_bmc_bios::get_bios_version_from_spiflash() const
     if (!img_fd) {
         std::string err_msg = "Unable to open file ";
         err_msg.append(BIOS_MTD_INFO_FILE);
+        unselect_mux();
         throw std::runtime_error(err_msg);
     }
 
     rc = fscanf(img_fd, "%s", mtd_dev);
     if (rc == 0) {
         fclose(img_fd);
+        unselect_mux();
         throw std::runtime_error("No MTD device found");
     }
     fclose(img_fd);
@@ -132,6 +136,7 @@ Fpd_bmc_bios::get_bios_version_from_spiflash() const
     if (version_offset % 512) {
         std::string err_msg = "Invalid version offset: ";
         err_msg.append(std::to_string(version_offset));
+        unselect_mux();
         throw std::runtime_error(err_msg);
     }
 
@@ -146,12 +151,14 @@ Fpd_bmc_bios::get_bios_version_from_spiflash() const
     if (rc) {
         std::string err_msg = "Unable to get size of file ";
         err_msg.append(BIOS_VER_INFO_FILE);
+        unselect_mux();
         throw std::runtime_error(err_msg);
     }
 
     if (img_statbuf.st_size == 0) {
         std::string err_msg = BIOS_VER_INFO_FILE;
         err_msg.append(" file is empty");
+        unselect_mux();
         throw std::runtime_error(err_msg);
     }
 
@@ -159,12 +166,14 @@ Fpd_bmc_bios::get_bios_version_from_spiflash() const
     if (!img_fd) {
         std::string err_msg = "Unable to open file ";
         err_msg.append(BIOS_VER_INFO_FILE);
+        unselect_mux();
         throw std::runtime_error(err_msg);
     }
 
     rc = fseek(img_fd, BIOS_SIGNATURE_OFFSET, SEEK_SET);
     if (rc) {
         fclose(img_fd);
+        unselect_mux();
         throw std::runtime_error("Failed to move to BIOS version signature offset.");
     }
 
@@ -182,6 +191,7 @@ Fpd_bmc_bios::get_bios_version_from_spiflash() const
         rc = fseek(img_fd, BIOS_VERSION_OFFSET, SEEK_SET);
         if (rc) {
             fclose(img_fd);
+            unselect_mux();
             throw std::runtime_error("Failed to move to BIOS version offset.");
         }
         memset(flash_data, 0, sizeof(flash_data));
@@ -202,6 +212,7 @@ Fpd_bmc_bios::get_bios_version_from_spiflash() const
         err_msg.append(flash_data);
         err_msg.append(" Expected: ");
         err_msg.append(BIOS_VER_SIGNATURE);
+        unselect_mux();
         throw std::runtime_error(err_msg);
     }
 }
