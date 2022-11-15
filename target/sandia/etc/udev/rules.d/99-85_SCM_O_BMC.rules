@@ -58,6 +58,8 @@ SUBSYSTEM=="gpio", SUBSYSTEMS=="platform", KERNELS=="gpio.1", ACTION=="add", RUN
 SUBSYSTEM=="gpio", SUBSYSTEMS=="platform", KERNELS=="gpio.1", ACTION=="remove", RUN+="/usr/bin/rm -f /run/devmap/gpiochips/IOB_GPIO"
 SUBSYSTEM=="watchdog", SUBSYSTEMS=="platform", KERNELS=="wdt.0", DRIVERS=="cisco-fpga-wdt", ACTION=="add", RUN+="/bin/ln -s /dev/%k /run/devmap/watchdogs/SYSTEM_WDT"
 SUBSYSTEM=="watchdog", SUBSYSTEMS=="platform", KERNELS=="wdt.0", DRIVERS=="cisco-fpga-wdt", ACTION=="remove", RUN+="/usr/bin/rm -f /run/devmap/watchdogs/SYSTEM_WDT"
+SUBSYSTEM=="watchdog", SUBSYSTEMS=="platform", KERNELS=="pwm.0", DRIVERS=="cisco-bmc-pwm", ACTION=="add", RUN+="/bin/ln -s /dev/%k /run/devmap/watchdogs/FAN_WDT"
+SUBSYSTEM=="watchdog", SUBSYSTEMS=="platform", KERNELS=="pwm.0", DRIVERS=="cisco-bmc-pwm", ACTION=="remove", RUN+="/usr/bin/rm -f /run/devmap/watchdogs/FAN_WDT"
 SUBSYSTEM=="i2c", KERNEL=="*-0040", ATTRS{name}=="i2c-*-mux (chan_id 0)", ACTION=="add", RUN+="/bin/ln -s /sys/bus/i2c/devices/%k /run/devmap/cplds/CPU_CPLD_UPGRADE"
 SUBSYSTEM=="i2c", KERNEL=="*-0040", ATTRS{name}=="i2c-*-mux (chan_id 0)", ACTION=="remove", RUN+="/usr/bin/rm -f /run/devmap/cplds/CPU_CPLD_UPGRADE"
 DEVPATH=="*/i2c-ext.2/i2c-*/*-0050*", SUBSYSTEM=="i2c", SUBSYSTEMS=="i2c", ACTION=="add", RUN+="/bin/ln -s /sys/bus/i2c/drivers/at24/%k/eeprom /run/devmap/eeproms/SCM"

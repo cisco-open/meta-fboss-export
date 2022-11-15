@@ -1,7 +1,6 @@
 # weutil
 
-add_executable(weutil
-    src/weutil/weutil.cc
+add_library(weutil
     src/weutil/WeutilExport.cpp
     fboss/platform/weutil/WeutilSandia.cpp
     fboss/platform/weutil/WeutilLassen.cpp
@@ -21,7 +20,7 @@ target_include_directories(weutil
 )
 install(
     TARGETS weutil
-    DESTINATION opt/cisco/bin
+    DESTINATION opt/cisco/lib
     PERMISSIONS OWNER_READ OWNER_EXECUTE
                 GROUP_READ GROUP_EXECUTE
                 WORLD_EXECUTE

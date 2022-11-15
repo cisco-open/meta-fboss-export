@@ -16,13 +16,12 @@
 
 #include "fw_util.h"
 #include "bsp/find.h"
+#include "LassenFw_utilConfig.h"
 
-namespace facebook::fboss::platform {
-
-std::string getLassenFpdsData();
+namespace facebook::fboss::platform::fw_util {
 
 void
-facebook::fboss::platform::fw_util::init_lassen()
+init_lassen()
 {
     std::string platform = getLassenFpdsData();
     bsp2::load<bsp2::fpd_t>(platform);

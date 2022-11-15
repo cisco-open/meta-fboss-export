@@ -15,6 +15,7 @@ create_images() {
     sudo dd if=$image_name bs=128 skip=1 of=$IMAGE_FILE
     if [[ $? -ne 0 ]]; then
         echo "Failed to create bin upgrade file"
+        unset_cpld_misc_bmcCpuSpiFlashSel
         exit 1
     fi
 
@@ -25,6 +26,7 @@ create_images() {
         sudo dd if=$IMAGE_FILE bs=256 skip=32768 of=$UPGRADE_FILE
         if [[ $? -ne 0 ]]; then
             echo "Failed to create bin upgrade file"
+            unset_cpld_misc_bmcCpuSpiFlashSel
             exit 1
         fi
     fi
@@ -38,6 +40,7 @@ program_image() {
     is_x86_on
     if [ $? == 0 ]; then
         echo "BIOS SPI flash upgrade requires x86 in power off state. Skipping upgrade!!"
+        unset_cpld_misc_bmcCpuSpiFlashSel
         exit 1
     fi
 
@@ -60,6 +63,7 @@ program_image() {
     sudo flashcp -v $UPGRADE_FILE /dev/$mtd_part
     if [[ $? -ne 0 ]]; then
         echo "Programming microinit image FAILED"
+        unset_cpld_misc_bmcCpuSpiFlashSel
         exit 1
     fi
 

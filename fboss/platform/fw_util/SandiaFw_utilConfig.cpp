@@ -169,7 +169,7 @@ std::string getSandiaFpdsData() {
                     "type": "platform"
                 }
             ],
-            "path": ""
+            "path": "/opt/cisco/fpd/nvme.imgs"
         },
         {
             "description": "CPU CPLD",

@@ -21,14 +21,13 @@
 #include "fboss/platform/weutil/WeutilInterface.h"
 
 #include "bsp/idprom.h"
+#include "WeutilSandia.h"
+#include "WeutilLassen.h"
+#include "WeutilExport.h"
 
 using json = nlohmann::json;
 
 namespace facebook::fboss::platform {
-
-std::unique_ptr<WeutilInterface> get_cisco_weutil();
-std::unique_ptr<WeutilInterface> get_lassen_weutil();
-std::unique_ptr<WeutilInterface> get_sandia_weutil();
 
 class WeutilCisco : public WeutilInterface
 {

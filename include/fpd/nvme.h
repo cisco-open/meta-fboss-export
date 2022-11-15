@@ -26,4 +26,4 @@ public:
 
 };
 
-void nvme_upgrade(std::string);
+void nvme_upgrade(std::string image, std::string pid);

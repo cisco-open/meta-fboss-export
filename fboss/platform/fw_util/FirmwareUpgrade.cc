@@ -94,7 +94,7 @@ FirmwareUpgradeCisco8000::program_fw(std::string name, std::string path) const
         }
         try {
             if (fpd->is_present()) {
-                fpd->program();
+                fpd->program(true);
                 program_msg = "Program successful. Reboot or activate is required to complete the firmware upgrade";
             }
         } catch (const std::exception &ex) {

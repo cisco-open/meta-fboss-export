@@ -1,4 +1,38 @@
+2022-11-14 Snapshot
+    - MIGSOFTWAR-4755 : FAN Watchdog kmod update
+
+    - MIGSOFTWAR-4273: NVMe needs to pass a file for fw_util
+
+    - MIGSOFTWAR-4755 : FAN Watchdog kmod update
+      . Added udav rules
+    - MIGSOFTWAR-4273: NVMe needs to pass a file for fw_util
+      . Update the YAML/JSON file to include the path for nvme.imgs
+    - Include cpu cpld fpd config for BMC
+    - Remove i2c driver before slpc. No arguments are needed for the PEX driver
+
+    - MIGSOFTWAR-4957: Add MTD information for the NPU flash to ACPI
+
+    - MIGSOFTWAR-4273 NVMe needs to pass a file for fw_util
+      . Add header information for an "imgs" file to combine multiple FPD imags
+      . Add APIs necessary to parse the images
+      . Add API to uncompress image
+      . Removed a few of the debug prints
+    - Add mux unselect in exit conditions for consistency
+
+    - Fixed include path for build
+    - MIGSOFTWAR-4960: Separated static lib and executables, Added header files
+      . Created one header per cpp
+    - enabling fwDowngrade support by defaulting to force programming
+
+    - MIGSOFTWAR-4960: Separated static lib and executables, Added header files
+      . Separated static lib and executable
+      . Added libz for fw_util_cisco
+    - MIGSOFTWAR-4273 NVMe needs to pass a file for fw_util
+
+
 2022-11-04 Snapshot
+    - MIGSOFTWAR-4523 - Integrate acpi into BIOS
+    
     - MIGSOFTWAR-1641: module load/unload improvements
     - MIGSOFTWAR-3875: pass checkpatch script
     - MIGSOFTWAR-4710: Lock controller in cisco-platform
