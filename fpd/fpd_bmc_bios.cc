@@ -228,6 +228,7 @@ Fpd_bmc_bios::program(bool force) const
             info.append(": Running version(").append(run_version)
                 .append(") is greater than or same as packaged version(")
                 .append(pack_version).append("). Only upgrades are allowed!");
+            unselect_mux();
             throw std::system_error(EPERM, std::generic_category(), info);
         }
     }

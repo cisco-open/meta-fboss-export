@@ -17,6 +17,7 @@ target_link_libraries(fw_util
     glog
     stdc++fs
     z
+    pthread
 )
 target_include_directories(fw_util
     PUBLIC
