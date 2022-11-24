@@ -1,3 +1,38 @@
+2022-11-23 Snapshot
+  - MIGSOFTWAR-5151 SPI, CSPI updates to support regmap
+    . Renumber the SPI/CSPI controllers
+    . Update to add the driver, and correct macro entries
+    . Update the mtd sections
+    . Introduce "poll_mode" for SPI in acpi for the PIM
+
+  - Add regmap
+    . Add support for winbond part (faking for now -- lets discuss)
+    . Add support for cspi for block id 154
+    . Add regmap to the mfd table
+
+  - MIGSOFTWAR-5170: cisco spi driver update to support internal flash
+    . cisco-spi driver is updated to support infra for adding comand support
+      to internal read from internal flash
+
+  - Address checkpatch warnings
+
+  - Skip devid 0 for BIOS
+
+  - MIGSOFTWAR-4805: Install static analysis tools
+
+  - MIGSOFTWAR-5284: Cmake update for lib
+    . Added new cmake files for fan_service, sensor_service and data_corral_service
+    . Updated cmake files to avoid download of libs if library paths are provided with ENV variables
+
+  - Selective inclusion of data_corral_service buil, it need built FBOSS folder
+
+  - Corrected spelling(s)
+
+  - Initial commit for lattice SPI driver to access SPI flash
+
+  - Missed corner case for unselect mux for FPD BIOS from BMC
+
+
 2022-11-14 Snapshot
     - MIGSOFTWAR-4755 : FAN Watchdog kmod update
 
@@ -29,6 +64,44 @@
       . Added libz for fw_util_cisco
     - MIGSOFTWAR-4273 NVMe needs to pass a file for fw_util
 
+    - FPD Changes:
+        BIOS        Verion 0.56 (In Export)
+            1) Added SCM ACPI SSDT to BIOS
+            2) Disabled Cyclonus stage1 and stage2 watchdogs
+            3) Jira MIGSOFTWAR-4522 - BIOS_FULL upgrade requires BSP image to be reinstalled.
+
+        CPU_CPLD    Verion 0.33 (In Export)
+            1) updated x86 power down sequence
+
+        SCM_IOFPGA  Verion 1.04 (In Export)
+            1) New "smbus_fsp" IP block (ID = 148) added to fix Kodaik PSU airflow issues.
+            2) Reduced x86 power-cycle time from 10sec to 2.4sec, as requested by Meta and
+               HW team.
+            3) Added leakage-reduction gating logic on these SCM->SMB signals; CPU_SMB_*,
+               P2PM_SCM_*, SMB_MUX_RESET_L.
+            4) Fixed System LED blink period to make it exactly 0.5sec/0.5sec.  This resolves
+               CSCwd18159.
+            5) Set System LED to amber on errors, as requested by Meta.
+            6) Allow the golden BIOS to be select by BMC for access while the x86 is powered off.
+
+        SMB_IOFPGA  Verion 1.01 (In Export)
+            1) Support for forwarding System Fan PWM via P2PM to Cyclonus
+            2) Added forwarding secureboot validation complete as status to Cyclonus to release CPU out of reset
+
+        POWER_CPLD  Verion 0.15
+
+
+        PIM_IOFPGA  Verion 1.02 (In Export)
+            1) release key
+            2) Hold Amber status LED to off till KF is done
+            3) updated Amber status LED PWM value as Alex requested.
+            4) changed ejector debounce default to 500msec.
+
+        RETIMER     Verion 0.11
+            1) Initial version
+
+        NVME        Verion 1.0 (In Export)
+             1) Intial versions
 
 2022-11-04 Snapshot
     - MIGSOFTWAR-4523 - Integrate acpi into BIOS

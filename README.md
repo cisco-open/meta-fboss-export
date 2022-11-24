@@ -37,11 +37,28 @@ Support requests should be sent to ospo-kmod@cisco.com. We will publish new snap
         $ mkdir obj
         $ cd obj
 ```
-4. Generate makefiles with CMake
+
+4. Export the following environment variables if the required packages are already available on the system. Package shall be downloaded from the GitHub if an environment variable is not provided.
+```console
+      GLOG_PATH
+      NLOHMANN_JSON_PATH
+      HOWARDHINNAN_DATE_PATH
+      FBOSS_PATH
+```
+
+        eg.
+```console
+    export GLOG_PATH=/usr
+    export NLOHMANN_JSON_PATH=/cisco/export/pull_form_upstream/external_repos/json/
+    export HOWARDHINNAN_DATE_PATH=/cisco/export/pull_form_upstream/external_repos/date-3.0.1/
+    export FBOSS_PATH=/cisco/export/pull_form_upstream/external_repos/fboss/
+```
+
+5. Generate makefiles with CMake
 ```console
         $ cmake ../
 ```   
-5. Initiate the build
+6. Initiate the build
 ```console
         $ make
 ```   
